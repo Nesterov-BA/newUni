@@ -1,3 +1,5 @@
+using namespace std;
+
 #include <iostream>
 #include "valInit.hpp"
 
@@ -52,10 +54,10 @@ int main(int argc, char** argv){
 	// перекинуть вычисление d и коэффицентов в отдельный файл
 
 	
-	// for (int i = 0; i < pointsCount; i++)
-	// {
-	// 	cout << points[i] << " " << values[i] << "\n";
-	// }
+	for (int i = 0; i < pointsCount; i++)
+	{
+		cout << points[i] << " " << values[i] << "\n";
+	}
 	
 	return 0;
 
