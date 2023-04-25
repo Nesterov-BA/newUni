@@ -2,6 +2,8 @@
 #define MYCOEFF
 
 #include <cmath>
+#include "valInit.hpp"
+
 using namespace std;
 
 void coefficents_eval(double* Points, double* values, int size, int func, double* coeff)

@@ -51,7 +51,7 @@ int main(int argc, char** argv){
 	
 	for (int i = 0; i < pointsCount; i++)
 	{
-		cout << points[i] << " " << values[i] << "\n";
+		cout << points[i] << " " << coefficents[4*i] << " " << coefficents[4*i+1] << "\n";
 	}
 	
 	return 0;
