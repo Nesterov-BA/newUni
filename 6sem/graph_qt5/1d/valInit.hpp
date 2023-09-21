@@ -1,8 +1,7 @@
 #ifndef MYINIT
 #define MYINIT
 
-#include <cmath>
-using namespace std;
+
 
 double fun(int k, double x);
 double dFun(int k, double x);
