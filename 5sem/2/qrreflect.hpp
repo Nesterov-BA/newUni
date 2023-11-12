@@ -3,6 +3,7 @@
 
 #include "functions.hpp"
 #include <complex>
+#include <cstdio>
 
 
 void refmatr(double* buff, double* A, double* first, double* second, int n, bool* problemsolved, double* added);
@@ -38,6 +39,8 @@ void refmatr(double* buff, double* A, double* first, double* second, int n, bool
 		normalize(refvec, n);
 		first[col] = refvec[col];
 		second[col] = refvec[col+1];
+		if(col == n-1)
+			printf("second[n-1] = %f\n", second[col]);
 		//printf("%f, %f\n", refvec[col], refvec[col+1]);
 		/*printf("x= (");
 		for (int i = 0; i < n-1; ++i)
@@ -52,6 +55,8 @@ void refmatr(double* buff, double* A, double* first, double* second, int n, bool
 				
 			A[i+n*col] -= refvec[col]*scalar1;
 			A[i+n*(col+1)] -= refvec[col+1]*scalar1;
+			if(col == n-1)
+				printf("refvec = %f\n", refvec[col+1]);
 			
 			/*for (int j = col; j < n; ++j)
 			{

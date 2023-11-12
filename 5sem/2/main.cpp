@@ -42,7 +42,9 @@ int main(int argc, char **argv)
     double* eigenval = new double[n];
     double precision = 0.000001;
     id(ans, n);
-
+    double inv1 = 0;
+    for(int i = 0; i < n; i++)
+        inv1 += A[i*n+i];
     clock_t tStart = clock();
     triang(A, n);
     print_matrix(n, A);
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
     printf("Time taken: %.2fs\n", (double)(tEnd - tStart)/CLOCKS_PER_SEC);
 
     print_matrix(n, A);
-    //print_matrix(n, ans);
+    print_matrix(n, ans);
 
    
     double * temp2 = new double[n * n];
@@ -65,7 +67,15 @@ int main(int argc, char **argv)
         }
     }
 
-    //calc_mistake(n, temp, ans, temp2);
+    printf("Eigenvalues: ");
+    for(int i = 0; i < n; i++)
+        {
+            printf("%f, ", eigenval[i]);
+            inv1 -= eigenval[i];
+        }
+    printf(", inv1 = %f\n", inv1);
+
+    calc_mistake(n, temp, ans, temp2);
     
 
 

@@ -19,10 +19,15 @@ void thomas_algorithm(double* a,
   // save excess allocation and deallocation
   double* c_star = new double[N];
   double* d_star = new double[N];
+  for(int i = 0; i < N; i++)
+  {
+      c_star[i] = 0;
+      d_star[i] = 0;
+  }
 
   // This updates the coefficients in the first row
   // Note that we should be checking for division by zero here
- /* c_star[0] = c[0] / b[0];
+  c_star[0] = c[0] / b[0];
   d_star[0] = d[0] / b[0];
 
   // Create the c_star and d_star coefficients in the forward sweep
@@ -35,10 +40,13 @@ void thomas_algorithm(double* a,
   c_star[N-1] = 0;
   // This is the reverse sweep, used to update the solution vector f
   for (int i=N-1; i-- > 0; ) {
-    f[i] = d_star[i] - c_star[i] * d[i+1];*/
-  c[0] /= b[0];
-  d[0] /= b[0];
-  double m;
+    f[i] = d_star[i] - c_star[i] * d[i+1];
+  }
+  if(fabs(c[0]) > 0 && fabs(d[0]) > 0)
+  {
+    c[0] /= b[0];
+    d[0] /= b[0];
+  }
   for(int row = 1; row < N; row++)
   {
     b[row] -= c[row-1]*a[row-1];
@@ -83,7 +91,10 @@ void coefficents_eval(double* Points, double* values, int size, int func, double
     for (int i = 0; i < size; i++)
     {
         coeff[3*i] = v[i];
-        coeff[3*i + 2] = 2*(v[i+1] + v[i] - 2*values[i])/(step*step);
+        if(i < size-1)
+            coeff[3*i + 2] = 2*(v[i+1] + v[i] - 2*values[i])/(step*step);
+        else
+            coeff[3*i+2] = 2*(v[i] - 2*values[i])/(step*step);
         coeff[3*i + 1] = 2*(values[i] - v[i])/step - step*coeff[3*i +2]/2;
     }
 }

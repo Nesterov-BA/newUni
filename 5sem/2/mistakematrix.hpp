@@ -21,15 +21,15 @@ void calc_mistake(int n, double* A, double* ans, double* temp)
     }
     for (i = 0; i < n; i++)
     {
-        ans[i*n + i]--;
+        temp[i*n + i]--;
     }
     double max = 0.0;
-
+    
     for (i = 0; i < n; i++)
     {
         for (j = 0; j < n; j++)
         {
-            max += dabs(ans[i*n+j]);
+            max += dabs(temp[i*n+j]);
         }
     }
     printf("НЕВЯЗКА = %f\n", max);

@@ -18,8 +18,14 @@ MyGLWidget::~MyGLWidget(){
     free(cy);
     free(Fx);
     free(Fy);
-    free(TT);
-    free(T);
+//    free(intX);
+//    free(intY);
+    free(Fxy);
+    free(TF);
+    free(intValues);
+    free(Gamma);
+    free(d2Fx);
+    free(d2Fy);
 }
 
 int MyGLWidget::parse_command_line(){
@@ -50,25 +56,42 @@ int MyGLWidget::parse_command_line(){
     nx=args.at(2).toInt(&ok);
     if(!ok)
         return -4;
-    if(nx<5)
-        return -5;
+//    if(nx<5)
+//        return -5;
     ny=args.at(3).toInt(&ok);
     if(!ok)
         return -6;
-    if(ny<5)
-        return -7;
+//    if(ny<5)
+//        return -7;
     k=args.at(4).toInt(&ok);
     if(!ok)
         return -8;
     if(k<0 || k>7)
         return -9;
+    stepX =(b-a)/nx;
+    stepY = (d-c)/ny;
     allocate();
-    chebyshevpoints(cx, cy, nx, ny, a, b, c, d);
-    fill_Fx(Fx, cx, nx, a, b);
-    fill_Fy(Fy, cy, ny, c, d);
+    points(cx, cy, nx, ny, a, b, c, d);
+   // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
     change_func();
-    interpolation_tensor(T, Fx, F, Fy, nx, ny);
-    Fill_TT(Fx, nx, T,Fy,ny, TT);
+  //  Fill_F(F, nx, ny, cx, cy, f);
+    max_z=max_matr(F,nx,ny);
+    min_z=min_matr(F,nx,ny);
+    absmax=max(fabs(max_z),fabs(min_z));
+    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+    evalFx(F, Fx, nx, ny, stepX, d2Fy);
+    evalFy(F, Fy, nx, ny, stepY, d2Fx);
+    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
+    evalGamma(Gamma, stepX, stepY, TF, nx, ny);
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+        }
+    }
+    //transponse(intValues, nx*ny);
     extrema_hunt();
     print_console();
     return 0;
@@ -85,17 +108,34 @@ void MyGLWidget::allocate(){
         free(Fx);
     if(Fy)
         free(Fy);
-    if(T)
-        free(T);
-    if(TT)
-        free(TT);
-    F=(double*)malloc((nx+2)*(ny+2)*sizeof(double));
-    cx=(double*)malloc((nx+2)*sizeof(double));
-    cy=(double*)malloc((ny+2)*sizeof(double));
-    Fx=(double*)malloc(nx*nx*sizeof(double));
-    Fy=(double*)malloc(ny*ny*sizeof(double));
-    T=(double*)malloc(nx*ny*sizeof(double));
-    TT=(double*)malloc((nx+2)*(ny+2)*sizeof(double));
+    if(Fxy)
+        free(Fxy);
+    if(TF)
+        free(TF);
+    if(Gamma)
+        free(Gamma);
+    if(intValues)
+        free(intValues);
+    if(d2Fx)
+        free(d2Fx);
+    if(d2Fy)
+        free(d2Fy);
+//    if(intX)
+//        free(intX);
+//    if(intY)
+//        free(intY);
+    F=(double*)malloc((nx)*(ny)*sizeof(double));
+    printf("no segmentation fault here");
+    cx=(double*)malloc((nx)*sizeof(double));
+    cy=(double*)malloc((ny)*sizeof(double));
+    d2Fx=(double*)malloc((2*ny)*sizeof(double));
+    d2Fy=(double*)malloc((2*nx)*sizeof(double));
+    Fx=(double*)malloc(nx*ny*sizeof(double));
+    Fy=(double*)malloc(nx*ny*sizeof(double));
+    Fxy=(double*)malloc(nx*ny*sizeof(double));
+    TF=(double*)malloc(nx*ny*16*sizeof(double));
+    Gamma=(double*)malloc(nx*ny*16*sizeof(double));
+    intValues = (double*)malloc((nx*ny)*sizeof(double));
 }
 
 void MyGLWidget::print_console(){
@@ -115,42 +155,51 @@ void MyGLWidget::change_func(){
         case 0:
             f_name="k=0 f(x,y)=1";
             f=f0;
+            d2f = d2f0;
             break;
         case 1:
             f_name="k=1 f(x,y)=x";
             f=f1;
+            d2f = d2f1;
             break;
         case 2:
             f_name="k=2 f(x,y)=y";
             f=f2;
+            d2f = d2f2;
             break;
         case 3:
             f_name="k=3 f(x,y)=x+y";
             f=f3;
+            d2f = d2f3;
             break;
         case 4:
             f_name="k=4 f(x,y)=sqrt(x^2+y^2)";
             f=f4;
+            d2f = d2f4;
             break;
         case 5:
             f_name="k=5 f(x,y)=x^2+y^2";
             f=f5;
+            d2f = d2f5;
             break;
         case 6:
             f_name="k=6 f(x,y)=exp(x^2-y^2)";
             f=f6;
+            d2f = d2f6;
             break;
         case 7:
             f_name="k=7 f(x,y)=1/(25*(x^2+y^2)+1)";
             f=f7;
+            d2f = d2f7;
             break;
     }
     Fill_F(F, nx, ny, cx, cy, f);
     max_z=max_matr(F,nx,ny);
     min_z=min_matr(F,nx,ny);
     absmax=max(fabs(max_z),fabs(min_z));
-    if(p)
-        F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
+    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+//    if(p)
+//        F[ny*(nx/2)+ny/2]+=(0.1*absmax*p);
     /*if(p){
         F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
         if(F[(ny+2)*(nx/2+1)+ny/2+1]>max_z)
@@ -164,24 +213,24 @@ void MyGLWidget::extrema_hunt(){
     if(view_id==0){
         extr[1]=max_z;
         extr[0]=min_z;
-        if(p>0 && F[(ny+2)*(nx/2+1)+ny/2+1]>max_z)
-            extr[1]=F[(ny+2)*(nx/2+1)+ny/2+1];
-        if(p<0 && F[(ny+2)*(nx/2+1)+ny/2+1]<min_z)
-            extr[0]=F[(ny+2)*(nx/2+1)+ny/2+1];
+        if(p>0 && F[(ny)*(nx/2)+ny/2]>max_z)
+            extr[1]=F[(ny)*(nx/2)+ny/2];
+        if(p<0 && F[(ny)*(nx/2)+ny/2]<min_z)
+            extr[0]=F[(ny)*(nx/2)+ny/2];
     }
     if(view_id==1){
-        extr[1]=max_matr(TT,nx,ny);
-        extr[0]=min_matr(TT,nx,ny);
+        extr[1]=max_matr(intValues,nx, ny);
+        extr[0]=min_matr(intValues,nx, ny);
     }
     if(view_id==2){
-        extr[0]=F[0]-TT[0];
-        extr[1]=F[0]-TT[0];
-        for(int i=0; i<=nx+1; ++i){
-            for(int j=0; j<=ny+1; ++j){
-                if(F[i*(ny+2)+j]-TT[i*(ny+2)+j]>extr[1])
-                    extr[1]=F[i*(ny+2)+j]-TT[i*(ny+2)+j];
-                if(F[i*(ny+2)+j]-TT[i*(ny+2)+j]<extr[0])
-                    extr[0]=F[i*(ny+2)+j]-TT[i*(ny+2)+j];
+        extr[0]=F[0]-intValues[0];
+        extr[1]=F[0]-intValues[0];
+        for(int i=0; i<nx; ++i){
+            for(int j=0; j<ny; ++j){
+                if(F[j*nx+i]-intValues[j*nx + i]>extr[1])
+                    extr[1]=F[j*nx+i]-intValues[j*nx + i];
+                if(F[i*ny+j]-intValues[i*ny+j]<extr[0])
+                    extr[0]=F[i*ny+j]-intValues[i*ny + j];
             }
         }
     }
@@ -189,15 +238,15 @@ void MyGLWidget::extrema_hunt(){
 
 void MyGLWidget::draw_area(){
     glColor3f(0.0,0.0,0.0);
-    for(int i=0; i<=nx+1; ++i){
+    for(int i=0; i<nx; ++i){
         glBegin(GL_LINE_STRIP);
-        for(int j=0; j<=ny+1; ++j)
+        for(int j=0; j<ny; ++j)
             glVertex3f(cx[i],cy[j],0);
         glEnd();
     }
-    for(int j=0; j<=ny+1; ++j){
+    for(int j=0; j<ny; ++j){
         glBegin(GL_LINE_STRIP);
-        for(int i=0; i<=nx+1; ++i)
+        for(int i=0; i<nx; ++i)
             glVertex3f(cx[i],cy[j],0);
         glEnd();
     }
@@ -205,107 +254,163 @@ void MyGLWidget::draw_area(){
 
 void MyGLWidget::func_graph(){
     glColor3f(1.0,1.0,0.0);
-    for(int i=0; i<=nx+1; ++i){
+    for(int i=0; i<nx; ++i){
         glBegin(GL_LINE_STRIP);
-        for(int j=0; j<=ny+1; ++j)
-            glVertex3f(cx[i],cy[j],F[i*(ny+2)+j]);
+        for(int j=0; j<ny; ++j)
+            glVertex3f(cx[i],cy[j],F[j*nx + i]);
         glEnd();
     }
-    for(int j=0; j<=ny+1; ++j){
+    for(int j=0; j<ny; ++j){
         glBegin(GL_LINE_STRIP);
-        for(int i=0; i<=nx+1; ++i)
-            glVertex3f(cx[i],cy[j],F[i*(ny+2)+j]);
+        for(int i=0; i<nx; ++i)
+            glVertex3f(cx[i],cy[j],F[j*nx + i]);
         glEnd();
     }
 }
 
 void MyGLWidget::appr_graph(){
     glColor3f(1.0,0.0,1.0);
-    for(int i=0; i<=nx+1; ++i){
+    for(int i=0; i<nx; ++i){
         glBegin(GL_LINE_STRIP);
-        for(int j=0; j<=ny+1; ++j)
-            glVertex3f(cx[i],cy[j],TT[i*(ny+2)+j]);
+        for(int j=0; j<ny; ++j)
+            glVertex3f(cx[i],cy[j],intValues[j*nx + i]);
         glEnd();
     }
-    for(int j=0; j<=ny+1; ++j){
+    for(int j=0; j<ny; ++j){
         glBegin(GL_LINE_STRIP);
-        for(int i=0; i<=nx+1; ++i)
-            glVertex3f(cx[i],cy[j],TT[i*(ny+2)+j]);
+        for(int i=0; i<nx; ++i)
+            glVertex3f(cx[i],cy[j],intValues[j*nx + i]);
         glEnd();
     }
 }
 
 void MyGLWidget::err_graph(){
     glColor3f(0.0,1.0,1.0);
-    for(int i=0; i<=nx+1; ++i){
+    for(int i=0; i<nx; ++i){
         glBegin(GL_LINE_STRIP);
-        for(int j=0; j<=ny+1; ++j)
-            glVertex3f(cx[i],cy[j],F[i*(ny+2)+j]-TT[i*(ny+2)+j]);
+        for(int j=0; j<ny; ++j)
+            glVertex3f(cx[i],cy[j],F[j*nx + i] - intValues[j*nx+i]);
         glEnd();
     }
-    for(int j=0; j<=ny+1; ++j){
+    for(int j=0; j<ny; ++j){
         glBegin(GL_LINE_STRIP);
-        for(int i=0; i<=nx+1; ++i)
-            glVertex3f(cx[i],cy[j],F[i*(ny+2)+j]-TT[i*(ny+2)+j]);
+        for(int i=0; i<nx; ++i)
+            glVertex3f(cx[i],cy[j],F[j*nx + i] - intValues[j*nx+i]);
         glEnd();
     }
 }
 
-void MyGLWidget::press0(){
-    change_func();
-    interpolation_tensor(T, Fx, F, Fy, nx, ny);
-    Fill_TT(Fx, nx, T,Fy,ny, TT);
-}
-
-void MyGLWidget::press23(){
-    chebyshevpoints(cx, cy, nx, ny, a, b, c, d);
-    fill_Fx(Fx, cx, nx, a, b);
-    fill_Fy(Fy, cy, ny, c, d);
-    Fill_F(F, nx, ny, cx, cy, f);
-    max_z=max_matr(F,nx,ny);
-    min_z=min_matr(F,nx,ny);
-    absmax=max(fabs(max_z),fabs(min_z));
-    if(p)
-        F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
-    interpolation_tensor(T, Fx, F, Fy, nx, ny);
-    Fill_TT(Fx, nx, T,Fy,ny, TT);
-}
-
-void MyGLWidget::press45(){
+void MyGLWidget::press0(){ // change function
     allocate();
-    chebyshevpoints(cx, cy, nx, ny, a, b, c, d);
-    fill_Fx(Fx, cx, nx, a, b);
-    fill_Fy(Fy, cy, ny, c, d);
+    points(cx, cy, nx, ny, a, b, c, d);
+    change_func();
+//    Fill_F(F, nx, ny, cx, cy, f);
+//    max_z=max_matr(F,nx,ny);
+//    min_z=min_matr(F,nx,ny);
+//    absmax=max(fabs(max_z),fabs(min_z));
+//    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+    evalFx(F, Fx, nx, ny, stepX, d2Fy);
+    evalFy(F, Fy, nx, ny, stepY, d2Fx);
+    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
+    evalGamma(Gamma, stepX, stepY, TF, nx, ny);
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+        }
+    }
+    //transponse(intValues, nx*ny);
+}
+
+void MyGLWidget::press23(){ // change size of area
+    allocate();
+    points(cx, cy, nx, ny, a, b, c, d);
+//    points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
     Fill_F(F, nx, ny, cx, cy, f);
     max_z=max_matr(F,nx,ny);
     min_z=min_matr(F,nx,ny);
     absmax=max(fabs(max_z),fabs(min_z));
-    if(p)
-        F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
-    interpolation_tensor(T, Fx, F, Fy, nx, ny);
-    Fill_TT(Fx, nx, T,Fy,ny, TT);
+    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+    evalFx(F, Fx, nx, ny, stepX, d2Fy);
+    evalFy(F, Fy, nx, ny, stepY, d2Fx);
+    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
+    evalGamma(Gamma, stepX, stepY, TF, nx, ny);
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+        }
+    }
+    //transponse(intValues, nx*ny);
 }
 
-void MyGLWidget::press67(){
-    interpolation_tensor(T, Fx, F, Fy, nx, ny);
-    Fill_TT(Fx, nx, T,Fy,ny, TT);
+void MyGLWidget::press45(){ // change number of interpolation points
+    allocate();
+    points(cx, cy, nx, ny, a, b, c, d);
+   // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
+//    if(p)
+//        F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
+
+    Fill_F(F, nx, ny, cx, cy, f);
+    max_z=max_matr(F,nx,ny);
+    min_z=min_matr(F,nx,ny);
+    absmax=max(fabs(max_z),fabs(min_z));
+
+    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+    evalFx(F, Fx, nx, ny, stepX, d2Fy);
+    evalFy(F, Fy, nx, ny, stepY, d2Fx);
+    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
+    evalGamma(Gamma, stepX, stepY, TF, nx, ny);
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+        }
+    }
+    //transponse(intValues, nx*ny);
+}
+
+void MyGLWidget::press67(){ // change disturbance
+    Fill_F(F, nx, ny, cx, cy, f);
+    max_z=max_matr(F,nx,ny);
+    min_z=min_matr(F,nx,ny);
+    absmax=max(fabs(max_z),fabs(min_z));
+    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
+    evalFx(F, Fx, nx, ny, stepX, d2Fy);
+    evalFy(F, Fy, nx, ny, stepY, d2Fx);
+    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
+    evalGamma(Gamma, stepX, stepY, TF, nx, ny);
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+        }
+    }
 }
 
 void MyGLWidget::printwindow(){
     qglColor(Qt::black);
-    if(nx<5){
-        renderText(10, 30, QString("TOO FEW POINTS by X"));
-    }
-    if(nx>50){
-        renderText(10, 30, QString("TOO MUCH POINTS by X"));
-    }
-    if(ny<5){
-        renderText(10, 60, QString("TOO FEW POINTS by Y"));
-    }
-    if(ny>50){
-        renderText(10, 60, QString("TOO MUCH POINTS by Y"));
-    }
-    if(nx<=50 && nx>=5 && ny<=50 && ny>=5){
+//    if(nx<5){
+//        renderText(10, 30, QString("TOO FEW POINTS by X"));
+//    }
+//    if(nx>50){
+//        renderText(10, 30, QString("TOO MUCH POINTS by X"));
+//    }
+//    if(ny<5){
+//        renderText(10, 60, QString("TOO FEW POINTS by Y"));
+//    }
+//    if(ny>50){
+//        renderText(10, 60, QString("TOO MUCH POINTS by Y"));
+//    }
+    //if(nx<=50 && nx>=5 && ny<=50 && ny>=5){
         renderText(0, 15, f_name);
         renderText(10, 30, QString("format: %1").arg(view_id));
         renderText(10, 45, QString("scale: %1 [%2;%3]x[%4;%5]").arg(s).arg(a).arg(b).arg(c).arg(d));
@@ -313,7 +418,7 @@ void MyGLWidget::printwindow(){
         renderText(10, 75, QString("p: %1").arg(p));
         renderText(10, 90, QString("absmax(fact): %1( %2)").arg(absmax).arg(max(fabs(extr[0]), fabs(extr[1]))));
         renderText(10, 105, QString("zRot: %1").arg(zRot));
-    }
+    //}
 }
 
 QSize MyGLWidget::minimumSizeHint() const{
@@ -420,7 +525,7 @@ void MyGLWidget::paintGL(){
     glRotatef(xRot , 1.0, 0.0, 0.0);
     glRotatef(yRot , 0.0, 1.0, 0.0);
     setProjection();
-    if(nx>=5 && nx<=50 && ny<=50 && ny>=5){
+   // if(nx>=5 && nx<=50 && ny<=50 && ny>=5){
         glLineWidth(2.0);
         glBegin(GL_LINES);
         glColor3d(1.0,0.0,0);
@@ -441,7 +546,7 @@ void MyGLWidget::paintGL(){
             appr_graph();
         if(view_id==2)
             err_graph();
-    }
+   // }
     printwindow();
 }
 
@@ -505,12 +610,12 @@ void MyGLWidget::keyPressEvent(QKeyEvent* e){
             break;
         case Qt::Key_6:
             ++p;
-            F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax);
+            F[(ny)*(nx/2)+ny/2]+=(0.1*absmax);
             press67();
             break;
         case Qt::Key_7:
             --p;
-            F[(ny+2)*(nx/2+1)+ny/2+1]-=(0.1*absmax);
+            F[(ny)*(nx/2)+ny/2]-=(0.1*absmax);
             press67();
             break;
         case Qt::Key_8:
