@@ -43,7 +43,7 @@ int MyGLWidget::parse_command_line(){
 
     if(k<0 || k>7)
         return -9;
-    step =(b-a)/n;
+    step =(b-a)/(n-1);
     allocate();
     points(c, n, a, b);
     points(intPoints, (n-1)*nInt+1, a, b);
@@ -179,7 +179,7 @@ void MyGLWidget::draw_area(){
 }
 
 void MyGLWidget::func_graph(){
-    glColor3f(1.0,1.0,0.0);
+    glColor3f(0.0,0.0,0.0);
     glBegin(GL_LINE_STRIP);
     for(int j=0; j<n; ++j)
         glVertex2f(c[j],F[j]);
@@ -203,20 +203,22 @@ void MyGLWidget::err_graph(){
 }
 
 void MyGLWidget::press0(){ // change function
+    step =(b-a)/(n-1);
     allocate();
     points(c, n, a, b);
     points(intPoints, (n-1)*nInt+1, a, b);
-    points(ksi, n+1, a-step, b+step);
+    points(ksi, n+1, a-step/2, b+step/2);
     change_func();
     coefficents_eval(F, n, coeff, step, d2Start, d2End);
     evalArr(apprVal, nInt, n, coeff, ksi, intPoints);
 }
 
 void MyGLWidget::press23(){ // change size of area
+    step =(b-a)/(n-1);
     allocate();
     points(c, n, a, b);
     points(intPoints, (n-1)*nInt+1, a, b);
-    points(ksi, n+1, a-step, b+step);
+    points(ksi, n+1, a-step/2, b+step/2);
     Fill_F(F, n, c, f);
     d2Start = d2f(a);
     d2End = d2f(b);
@@ -231,10 +233,11 @@ void MyGLWidget::press23(){ // change size of area
 }
 
 void MyGLWidget::press45(){ // change number of interpolation points
+    step =(b-a)/(n-1);
     allocate();
     points(c, n, a, b);
     points(intPoints, (n-1)*nInt+1, a, b);
-    points(ksi, n+1, a-step, b+step);
+    points(ksi, n+1, a-step/2, b+step/2);
     Fill_F(F, n, c, f);
     d2Start = d2f(a);
     d2End = d2f(b);
@@ -281,6 +284,7 @@ void MyGLWidget::printwindow(){
         renderText(10, 60, QString("points: %1").arg(n));
         renderText(10, 75, QString("p: %1").arg(p));
         renderText(10, 90, QString("absmax(fact): %1( %2)").arg(absmax).arg(max(fabs(extr[0]), fabs(extr[1]))));
+        renderText(10, 105, QString("ksiIntervals: %1, %2, step = %3").arg(ksi[1] - ksi[0]).arg(ksi[n-4]-ksi[n-5]).arg(step));
     //}
 }
 

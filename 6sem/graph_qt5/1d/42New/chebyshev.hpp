@@ -78,11 +78,18 @@ void coefficents_eval(double* values, int size, double* coeff, double step, doub
     {
         coeff[3*i] = v[i];
 
-        coeff[3*i + 1] = (2*values[i] - v[i+1] - v[i])/(step*step);
+        coeff[3*i + 1] = (-4*v[i+1] + 10*values[i] - 6*v[i])/(step);
+        //2*(f(xi) - vi) - 2*(2(v(i+1) - 2*f(xi) + vi) =
 
         coeff[3*i + 2] = 2*(v[i+1] + v[i] - 2*values[i])/(step*step);
     }
+    delete[] v;
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    delete[] d;
 }
+
 
 double approx_eval(double point, double* coeff, int intervalNum, double* points)
 {
@@ -92,19 +99,19 @@ double approx_eval(double point, double* coeff, int intervalNum, double* points)
 
 
 
-void evalArr(double* arr, int nInt, int n, double* coeff, double* points, double* intPoints)
+void evalArr(double* arr, int nInt, int n, double* coeff, double* ksi, double* intPoints)
 {
     for(int i = 0; i < n-1; i++)
     {
         for(int j = 0; j < nInt; j++)
         {
-            if(intPoints[i*nInt + j] < (points[i] + points[i+1])/2)
-                arr[i*nInt + j] = approx_eval(intPoints[i*nInt + j], coeff, i, points);
+            if(intPoints[i*nInt + j] < ksi[i+1])
+                arr[i*nInt + j] = approx_eval(intPoints[i*nInt + j], coeff, i, ksi);
             else
-                arr[i*nInt + j] = approx_eval(intPoints[i*nInt + j], coeff, i+1, points);
+                arr[i*nInt + j] = approx_eval(intPoints[i*nInt + j], coeff, i+1, ksi);
         }
     }
-    arr[(n-1)*nInt] = approx_eval(intPoints[(n-1)*nInt], coeff, n-1, points);
+    arr[(n-1)*nInt] = approx_eval(intPoints[(n-1)*nInt], coeff, n-1, ksi);
 }
 
 

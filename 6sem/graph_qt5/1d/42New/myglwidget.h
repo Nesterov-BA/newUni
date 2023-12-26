@@ -7,7 +7,7 @@ class MyGLWidget : public QGLWidget{
     int n; //number of points by Y
     int k; //id of the approxiamted function
     double step;
-    int nInt = 3;
+    int nInt = 20;
     double a; //left end by X
     double b; //right end by X
     double min_z; //function's minimum
