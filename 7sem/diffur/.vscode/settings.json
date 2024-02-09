@@ -1,5 +1,14 @@
 {
     "files.associations": {
-        "ostream": "cpp"
-    }
+        "ostream": "cpp",
+        "iosfwd": "cpp"
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/boris/Projects/newUni/7sem/diffur",
+            "binaryPath": "/home/boris/Projects/newUni/7sem/diffur/a.out",
+            "binaryArgs": []
+        }
+    ],
+    "makefile.buildLog": "/home/boris/Projects/newUni/7sem/diffur/log.txt"
 }
