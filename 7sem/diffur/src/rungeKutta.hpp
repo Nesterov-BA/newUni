@@ -100,11 +100,10 @@ void Runge_Kutta4StepVaried(double startX, double startY, double f(double, doubl
 
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count)
 {
-    bool cycleIsAlmostOver;
+    bool cycleIsAlmostOver = false;
     double endX;
     double endY;
     double cycleStartX, cycleStartY;
-    double cycleEndX, cycleEndY;
     double step = 1;
     double errorSum = 0;
     int cycleNumber = 0;
@@ -147,7 +146,7 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
             cout << "x diff = " << cycleStartX - endX << ", y diff = " << cycleStartY - endY<< endl;
             cout << cycleNumber << endl;
             cycleNumber++;
-            if(cycleNumber > 2000)
+            if(cycleNumber > 20)
                 break;
             if(fabs(cycleStartX - endX) < 1.e-4 && fabs(cycleStartY - endY) < 1.e-4) // если начало и конец цикла дотаточно близки, то цикл найден
             {    
@@ -161,10 +160,11 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
                 cycleStartY = endY;
                 cycleIsAlmostOver = false;
                 errorSum = 0;
-                 fout.close();
-                 clear();
-                 fout.open("data.txt");
-                 *count = 0;
+
+                fout.close();
+                clear();
+                fout.open("data.txt");
+                *count = 0;
             }
         }
     }

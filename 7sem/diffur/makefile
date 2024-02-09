@@ -1,10 +1,35 @@
-all: a.out clean
+# Variables
+CC = g++
+CFLAGS = -Wall -Wextra -O2 -g
+OBJDIR = obj
+SRCDIR = src
+BINDIR = bin
+TARGET = $(BINDIR)/a.out
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+DEPS = $(OBJS:.o=.d)
 
-main.o: main.cpp
-	g++ -c main.cpp
+# Phony Targets
+.PHONY: all clean
 
-a.out: main.o
-	g++  main.o 
+# Default Target
+all: $(TARGET)
 
-clean: main.o
-	rm main.o
+# Compile Object Files
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Generate Dependencies
+$(OBJDIR)/%.d: $(SRCDIR)/%.cpp
+	$(CC) -MM $< > $@
+
+# Link Object Files
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Include Dependencies
+-include $(DEPS)
+
+# Clean Target
+clean:
+	rm -f $(OBJDIR)/*.o $(OBJDIR)/*.d $(TARGET)

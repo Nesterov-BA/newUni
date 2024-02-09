@@ -7,7 +7,7 @@
         {
             "cwd": "/home/boris/Projects/newUni/7sem/diffur",
             "binaryPath": "/home/boris/Projects/newUni/7sem/diffur/a.out",
-            "binaryArgs": []
+            "binaryArgs": [1 , -1]
         }
     ],
     "makefile.buildLog": "/home/boris/Projects/newUni/7sem/diffur/log.txt"

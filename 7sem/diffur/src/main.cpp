@@ -20,7 +20,12 @@ double dy(double x, double y)
 
 int main (int argc, char** argv)
 {
-
+    if(argc != 3 || argc < 3)
+    {
+        cout << "Usage: " << argv[0] << " <xStart> <yStart>" << endl;
+        return 1;
+    }
+    
     double xStart = atof(argv[1]);
     double yStart = atof(argv[2]);
     int numberOfPoints = 0;
