@@ -1,0 +1,4 @@
+#!/bin/bash
+make clean
+make
+./bin/a.out 1 -1

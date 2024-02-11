@@ -8,8 +8,11 @@ void Runge_Kutta4Classic(double startX, double startY, double f(double, double),
 void Runge_Kutta4StepVaried(double startX, double startY, double f(double, double), double g(double, double), double* newStep, double* endX, double* endY, double* errorSum);
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count);
 
+int maxNumberOfCycles = 100;
+bool limitedCycles = true;
+
 double tolerance = 1.e-9;
-double maxStep = 3;
+double maxStep = 1;
 double minStep = 0.5;
 double factor = 0.9;
 double* c = new double[3];
@@ -146,8 +149,14 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
             cout << "x diff = " << cycleStartX - endX << ", y diff = " << cycleStartY - endY<< endl;
             cout << cycleNumber << endl;
             cycleNumber++;
-            if(cycleNumber > 20)
+            Runge_Kutta4StepVaried(xStart, yStart, f, g, &step, &endX, &endY, &errorSum);
+            if(cycleNumber > maxNumberOfCycles && limitedCycles)
+            {
+                cout << "startOfCycle: (" << cycleStartX << ", " << cycleStartY << ")" << endl;
+                cout << "endOfCycle: (" << endX << ", " << endY << ")" << endl;
                 break;
+            }
+                
             if(fabs(cycleStartX - endX) < 1.e-4 && fabs(cycleStartY - endY) < 1.e-4) // если начало и конец цикла дотаточно близки, то цикл найден
             {    
                 break;

@@ -15,7 +15,7 @@ double dx(double x, double y)
 }
 double dy(double x, double y)
 {
-    return /*alpha*/10*(1-x*x)*y-x;
+    return /*alpha*/0.1*(1-x*x)*y-x;
 }
 
 int main (int argc, char** argv)
