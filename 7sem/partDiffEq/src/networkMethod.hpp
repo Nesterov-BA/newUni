@@ -70,7 +70,7 @@ void networkMethod()
     createPoints();
     for (int j =  0; j < numberOfTPoints; ++j) {
         u[0][j] =  0;
-        u[1][j] = 0; // u is zero at t=0
+        u[1][j] = 0;
     }
     for(int i = 2; i < numberOfTPoints - 1; ++i)
     {

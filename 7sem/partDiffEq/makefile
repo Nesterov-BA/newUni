@@ -15,6 +15,11 @@ DEPS = $(OBJS:.o=.d)
 # Default Target
 all: $(TARGET)
 
+# Debugging
+debug: CFLAGS += -g
+debug: all
+	gdb $(TARGET)
+
 # Compile Object Files
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
