@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -68,7 +69,7 @@ void networkMethod()
 {
     allocateMemory();
     createPoints();
-    for (int j =  0; j < numberOfTPoints; ++j) {
+    for (int j =  0; j < numberOfXPoints; ++j) {
         u[0][j] =  0;
         u[1][j] = 0;
     }
@@ -77,7 +78,7 @@ void networkMethod()
         u[i+1][0] = dt * ((u[i][1] - u[i][0])/dx + sin(t[i])) + u[i][0];
     
         for(int j = 1; j < numberOfXPoints - 1; ++j)
-            u[i+1][j] = -dt*dt *((u[i][j+1] - 2*u[i][j] + u[i][j-1]) / (dx*dx) + 2*w[i][j]*u[i][j]) + 2*u[i][j] - u[i-1][j];
+            u[i+1][j] = dt*dt *((u[i][j+1] - 2*u[i][j] + u[i][j-1]) / (dx*dx) - 2*w[i][j]*u[i][j]) + 2*u[i][j] - u[i-1][j];
     
         u[i+1][numberOfXPoints-1] = dt * ((u[i][numberOfXPoints-1] - u[i][numberOfXPoints-2])/dx) + u[i][numberOfXPoints-1];
     }
