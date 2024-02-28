@@ -8,10 +8,10 @@ void Runge_Kutta4Classic(double startX, double startY, double f(double, double),
 void Runge_Kutta4StepVaried(double startX, double startY, double f(double, double), double g(double, double), double* newStep, double* endX, double* endY, double* errorSum);
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count);
 
-int maxNumberOfCycles = 100;
+int maxNumberOfCycles = 5;
 bool limitedCycles = true;
 
-double tolerance = 1.e-9;
+double tolerance = 1.e-7;
 double maxStep = 1;
 double minStep = 0.5;
 double factor = 0.9;
@@ -99,7 +99,7 @@ void Runge_Kutta4StepVaried(double startX, double startY, double f(double, doubl
     }
 
 }
-
+//стартуем из (0,3), прогоняем до момента, пока не станет (0, -x_0)
 
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count)
 {

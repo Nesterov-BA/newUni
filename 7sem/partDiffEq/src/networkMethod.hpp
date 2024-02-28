@@ -10,11 +10,11 @@ using namespace std;
 double leftBoundaryX = 0;
 double rightBoundaryX = 1;
 double leftBoundaryT = 0;
-double rightBoundaryT = 5;
+double rightBoundaryT = 1;
 
 
-int numberOfXPoints = 200;
-int numberOfTPoints = rightBoundaryT*2*numberOfXPoints;
+int numberOfXPoints = 10;
+int numberOfTPoints = rightBoundaryT*3*numberOfXPoints;
 
 double** u = new double*[numberOfTPoints];
 
