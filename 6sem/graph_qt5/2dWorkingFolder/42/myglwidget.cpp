@@ -16,6 +16,8 @@ MyGLWidget::~MyGLWidget(){
     free(F);
     free(cx);
     free(cy);
+    free(ksiX);
+    free(ksiY);
     free(Fx);
     free(Fy);
 //    free(intX);
@@ -45,10 +47,10 @@ int MyGLWidget::parse_command_line(){
     fscanf(ff, "%lf", &b);
     fscanf(ff, "%lf", &d);
     */
-    a = -0.25;
-    c = -0.25;
-    b = 0.25;
-    d = 0.25;
+    a = -1;
+    c = -1;
+    b = 1;
+    d = 1;
     if(fabs(a-b)<1e-6 || fabs(c-d)<1e-6)
         return -2;
     //fclose(ff);
@@ -68,10 +70,11 @@ int MyGLWidget::parse_command_line(){
         return -8;
     if(k<0 || k>7)
         return -9;
-    stepX =(b-a)/nx;
-    stepY = (d-c)/ny;
+    stepX =(b-a)/(nx-1);
+    stepY = (d-c)/(ny-1);
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
+    points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
    // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
     change_func();
   //  Fill_F(F, nx, ny, cx, cy, f);
@@ -79,16 +82,17 @@ int MyGLWidget::parse_command_line(){
     min_z=min_matr(F,nx,ny);
     absmax=max(fabs(max_z),fabs(min_z));
     Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
-    evalFx(F, Fx, nx, ny, stepX, d2Fy);
-    evalFy(F, Fy, nx, ny, stepY, d2Fx);
-    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFx(F, Fx, nx, ny, stepX, d2Fx);
+    evalFy(F, Fy, nx, ny, stepY, d2Fy);
+    evalFxy(Fy, Fxy, nx, ny, stepX, d2Fx);
     evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
     evalGamma(Gamma, stepX, stepY, TF, nx, ny);
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
-            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cy[j], ksiX[i], ksiY[j], nx, ny);
+            // printf("ksiX[%d], x[%d] = %f, %f\n", i, i, ksiX[i], cx[i]);
         }
     }
     //transponse(intValues, nx*ny);
@@ -104,6 +108,10 @@ void MyGLWidget::allocate(){
         free(cx);
     if(cy)
         free(cy);
+    if(ksiX)
+        free(ksiX);
+    if(ksiY)
+        free(ksiY);
     if(Fx)
         free(Fx);
     if(Fy)
@@ -125,16 +133,18 @@ void MyGLWidget::allocate(){
 //    if(intY)
 //        free(intY);
     F=(double*)malloc((nx)*(ny)*sizeof(double));
-    printf("no segmentation fault here");
+    printf("no segmentation fault here\n");
     cx=(double*)malloc((nx)*sizeof(double));
     cy=(double*)malloc((ny)*sizeof(double));
+    ksiX=(double*)malloc((nx+1)*sizeof(double));
+    ksiY=(double*)malloc((ny+1)*sizeof(double));
     d2Fx=(double*)malloc((2*ny)*sizeof(double));
     d2Fy=(double*)malloc((2*nx)*sizeof(double));
-    Fx=(double*)malloc(nx*ny*sizeof(double));
-    Fy=(double*)malloc(nx*ny*sizeof(double));
-    Fxy=(double*)malloc(nx*ny*sizeof(double));
-    TF=(double*)malloc(nx*ny*16*sizeof(double));
-    Gamma=(double*)malloc(nx*ny*16*sizeof(double));
+    Fx=(double*)malloc((nx+1)*ny*sizeof(double));
+    Fy=(double*)malloc(nx*(ny+1)*sizeof(double));
+    Fxy=(double*)malloc((nx+1)*(ny+1)*sizeof(double));
+    TF=(double*)malloc((nx)*(ny)*9*sizeof(double));
+    Gamma=(double*)malloc((nx)*(ny)*9*sizeof(double));
     intValues = (double*)malloc((nx*ny)*sizeof(double));
 }
 
@@ -303,6 +313,7 @@ void MyGLWidget::err_graph(){
 void MyGLWidget::press0(){ // change function
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
+    points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
     change_func();
 //    Fill_F(F, nx, ny, cx, cy, f);
 //    max_z=max_matr(F,nx,ny);
@@ -311,14 +322,15 @@ void MyGLWidget::press0(){ // change function
 //    Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
     evalFx(F, Fx, nx, ny, stepX, d2Fy);
     evalFy(F, Fy, nx, ny, stepY, d2Fx);
-    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFxy(Fy, Fxy, nx, ny, stepX, d2Fy);
     evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
     evalGamma(Gamma, stepX, stepY, TF, nx, ny);
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
-            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cy[j], ksiX[i], ksiY[j], nx, ny);
+            // printf("ksiX[%d], x[%d] = %f, %f\n", i, i, ksiX[i], cx[i]);
         }
     }
     //transponse(intValues, nx*ny);
@@ -327,7 +339,8 @@ void MyGLWidget::press0(){ // change function
 void MyGLWidget::press23(){ // change size of area
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
-//    points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
+    points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
+    // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
     Fill_F(F, nx, ny, cx, cy, f);
     max_z=max_matr(F,nx,ny);
     min_z=min_matr(F,nx,ny);
@@ -335,14 +348,15 @@ void MyGLWidget::press23(){ // change size of area
     Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
     evalFx(F, Fx, nx, ny, stepX, d2Fy);
     evalFy(F, Fy, nx, ny, stepY, d2Fx);
-    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFxy(Fy, Fxy, nx, ny, stepX, d2Fy);
     evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
     evalGamma(Gamma, stepX, stepY, TF, nx, ny);
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
-            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cy[j], ksiX[i], ksiY[j], nx, ny);
+            // printf("ksiX[%d], x[%d] = %f, %f\n", i, i, ksiX[i], cx[i]);
         }
     }
     //transponse(intValues, nx*ny);
@@ -351,7 +365,8 @@ void MyGLWidget::press23(){ // change size of area
 void MyGLWidget::press45(){ // change number of interpolation points
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
-   // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
+    points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
+    // points(intX, intY, (nx-1)*nInt+1, (ny-1)*nInt+1, a, b, c, d);
 //    if(p)
 //        F[(ny+2)*(nx/2+1)+ny/2+1]+=(0.1*absmax*p);
 
@@ -363,14 +378,15 @@ void MyGLWidget::press45(){ // change number of interpolation points
     Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
     evalFx(F, Fx, nx, ny, stepX, d2Fy);
     evalFy(F, Fy, nx, ny, stepY, d2Fx);
-    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFxy(Fy, Fxy, nx, ny, stepX, d2Fy);
     evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
     evalGamma(Gamma, stepX, stepY, TF, nx, ny);
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
-            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cy[j], ksiX[i], ksiY[j], nx, ny);
+            // printf("ksiX[%d], x[%d] = %f, %f\n", i, i, ksiX[i], cx[i]);
         }
     }
     //transponse(intValues, nx*ny);
@@ -384,14 +400,15 @@ void MyGLWidget::press67(){ // change disturbance
     Fill_d2F(d2Fx, d2Fy, nx, ny, cx, cy, d2f);
     evalFx(F, Fx, nx, ny, stepX, d2Fy);
     evalFy(F, Fy, nx, ny, stepY, d2Fx);
-    evalFxy(F, Fxy, nx, ny, stepX, d2Fy);
+    evalFxy(Fy, Fxy, nx, ny, stepX, d2Fy);
     evalFij(F, Fx, Fy, Fxy, TF, nx, ny);
     evalGamma(Gamma, stepX, stepY, TF, nx, ny);
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
-            interpolatetedVal(Gamma, i, j, intValues, cx[i], cx[i], cy[j], cy[j], nInt, nx, ny);
+            interpolatetedVal(Gamma, i, j, intValues, cx[i], cy[j], ksiX[i], ksiY[j], nx, ny);
+            // printf("ksiX[%d], x[%d] = %f, %f\n", i, i, ksiX[i], cx[i]);
         }
     }
 }

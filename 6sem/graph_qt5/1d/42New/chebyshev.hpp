@@ -78,7 +78,7 @@ void coefficents_eval(double* values, int size, double* coeff, double step, doub
     {
         coeff[3*i] = v[i];
 
-        coeff[3*i + 1] = (-4*v[i+1] + 10*values[i] - 6*v[i])/(step);
+        coeff[3*i + 1] = (-v[i+1] + 4*values[i] - 3*v[i])/(step);
         //2*(f(xi) - vi) - 2*(2(v(i+1) - 2*f(xi) + vi) =
 
         coeff[3*i + 2] = 2*(v[i+1] + v[i] - 2*values[i])/(step*step);
