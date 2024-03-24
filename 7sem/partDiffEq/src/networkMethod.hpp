@@ -10,10 +10,10 @@ using namespace std;
 double leftBoundaryX = 0;
 double rightBoundaryX = 1;
 double leftBoundaryT = 0;
-double rightBoundaryT = 1;
+double rightBoundaryT = 5;
 
 
-int numberOfXPoints = 10;
+int numberOfXPoints = 50;
 int numberOfTPoints = rightBoundaryT*3*numberOfXPoints;
 
 double** u = new double*[numberOfTPoints];
@@ -86,13 +86,13 @@ void networkMethod()
     }
     for(int i = 2; i < numberOfTPoints - 1; ++i)
     {
-        u[i+1][0] = dt * ((u[i][1] - u[i][0])/dx + sin(t[i])) + u[i][0];
+        u[i+1][0] = (2 * dt * dt / (dt + dx)) * ((u[i][1] - u[i][0])/dx + sin(t[i]) + u[i-1][0] / (2*dt) - dx * (2*w[i][0]*u[i][0] + (u[i-1][0] - 2 * u[i][0]) / (dt*dt))/2) ;
     
 
         for(int j = 1; j < numberOfXPoints - 1; ++j)
             u[i+1][j] = dt*dt *((u[i][j+1] - 2*u[i][j] + u[i][j-1]) / (dx*dx) - 2*w[i][j]*u[i][j]) + 2*u[i][j] - u[i-1][j];
     
-        u[i+1][numberOfXPoints-1] = dt * ((u[i][numberOfXPoints-2] - u[i][numberOfXPoints-1])/dx) + u[i][numberOfXPoints-1];
+        u[i+1][numberOfXPoints-1] = (2 * dt * dt / (dt + dx)) * ((u[i][numberOfXPoints-1] - u[i][numberOfXPoints - 2])/dx + u[i-1][numberOfXPoints-1] / (2*dt) - dx * (2*w[i][numberOfXPoints-1]*u[i][numberOfXPoints-1] + (u[i-1][numberOfXPoints-1] - 2 * u[i][numberOfXPoints-1]) / (dt*dt))/2);
     }
 }
 
