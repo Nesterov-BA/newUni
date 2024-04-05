@@ -4,3 +4,10 @@
 7sem/diffur/data.txt
 7sem/diffur/bin/a.out
 7sem/diffur/obj/main.o
+7sem/partDiffEq/data.txt
+7sem/partDiffEq/dudt.txt
+7sem/partDiffEq/dudx.txt
+7sem/partDiffEq/f.txt
+7sem/partDiffEq/bin/a.out
+7sem/partDiffEq/obj/main.d
+7sem/partDiffEq/obj/main.o

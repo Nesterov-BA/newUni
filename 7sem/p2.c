@@ -58,16 +58,16 @@ int Solver(double* u,int N, int M, double T, FILE* plot){      //u[n*M+m] = u(ta
 
     double tmp;
 
-    double tau = T/N;
-    double h = 1.0/M;
+    double tau = T/N; // time step
+    double h = 1.0/M; // space step
 
     for(int m = 0; m < M+1; m++){
         u[0*(M+1)+m] = 0;
-    }
+    } // initial condition U(0,i) = 0
 
     for(int m = 1; m < M; m++){
         u[1*(M+1)+m] = 0;
-    }
+    } // initial condition U'(0,i) = 0
 
     u[1*(M+1)+0] = 0;
     u[1*(M+1)+M] = 0;
@@ -85,14 +85,14 @@ int Solver(double* u,int N, int M, double T, FILE* plot){      //u[n*M+m] = u(ta
     for(int n = 1; n+1 < N+1; n++){
         for(int m = 1; m < M; m++){
             u[(n+1)*(M+1)+m] = 2*u[n*(M+1)+m]-u[(n-1)*(M+1)+m]+tau*tau*((u[n*(M+1)+m+1]-2*u[n*(M+1)+m]+u[n*(M+1)+m-1])/(h*h)-2*f_w(m*h)*u[n*(M+1)+m]);
-        }
+        } // схема крест
 
        tmp = u[(n-1)*(M+1)+0]+2*tau*((u[n*(M+1)+0+1]-u[n*(M+1)+0])/h)-h*(tau*2*f_w(h*0)*u[n*(M+1)+0]-((2*u[n*(M+1)+0]-u[(n-1)*(M+1)+0])/tau))+2*tau*sin(tau*n);
-        u[(n+1)*(M+1)+0] = tmp/(1+h/tau);
+        u[(n+1)*(M+1)+0] = tmp/(1+h/tau); // на границе слева
 
         tmp = u[(n-1)*(M+1)+(M)]-2*tau*((u[n*(M+1)+(M)]-u[n*(M+1)+(M)-1])/h)-h*(tau*2*f_w(h*(M))*u[n*(M+1)+(M)]-((2*u[n*(M+1)+(M)]-u[(n-1)*(M+1)+(M)])/tau));
         u[(n+1)*(M+1)+(M)] = tmp/(1+h/tau);
-
+        // на границе справа
         if(plot != NULL){
             for(int m = 0; m < M+1; m++){
                 fprintf(plot,"%10.7lf %10.7lf %10.7lf\n",m*h,(n+1)*tau,u[(n+1)*(M+1)+m]);
