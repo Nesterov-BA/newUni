@@ -103,80 +103,10 @@ void Runge_Kutta4StepVaried(double startX, double startY, double f(double, doubl
 
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count)
 {
-    bool cycleIsAlmostOver = false;
-    double endX;
-    double endY;
-    double cycleStartX, cycleStartY;
-    double step = 1;
-    double errorSum = 0;
-    int cycleNumber = 0;
-    // double distanceBetweenEnds = 0;
-    *count = 0;
-    ofstream fout;
-    fout.open("data.txt");
-    // cout << xStart << endl;
-    while(true)
-    {
-        Runge_Kutta4StepVaried(xStart, yStart, f, g, &step, &endX, &endY, &errorSum);
-        //  cout << xStart << endl;
-        xStart = endX;
-        yStart = endY;
-        if((endX > 0 && endY < 0)||(endX < 0 && endY > 0)) // как только вошли во 2 или 4 четверть, запускаем поиск цикла
-        {
-            cycleStartX = endX;
-            cycleStartY = endY;
-            break;
-        }
-    }
-    errorSum = 0;
+    xStart = 2;
+    yStart = 0;
 
-    fout << cycleStartX << endl << cycleStartY << endl;
-    //  cout << "hello" << endl;
-    while (true)
-    {
-        Runge_Kutta4StepVaried(xStart, yStart, f, g, &step, &endX, &endY, &errorSum);
-        //  cout << "step = " << step << endl;
-        xStart = endX;
-        yStart = endY;
-        fout<< endX << endl << endY << endl;
-        *count = *count + 1;
-        if(endX > 0 && endY > 0 && !cycleIsAlmostOver) // если вошли в первую четверть, осталось пройти только ее, т. е. цикл скоро закончится
-        {
-            cycleIsAlmostOver = true;
-        }
-        if(((endX > 0 && endY < 0) || (endX < 0 && endY > 0))&& cycleIsAlmostOver)
-        {
-            cout << "x diff = " << cycleStartX - endX << ", y diff = " << cycleStartY - endY<< endl;
-            cout << cycleNumber << endl;
-            cycleNumber++;
-            Runge_Kutta4StepVaried(xStart, yStart, f, g, &step, &endX, &endY, &errorSum);
-            if(cycleNumber > maxNumberOfCycles && limitedCycles)
-            {
-                cout << "startOfCycle: (" << cycleStartX << ", " << cycleStartY << ")" << endl;
-                cout << "endOfCycle: (" << endX << ", " << endY << ")" << endl;
-                break;
-            }
-                
-            if(fabs(cycleStartX - endX) < 1.e-4 && fabs(cycleStartY - endY) < 1.e-4) // если начало и конец цикла дотаточно близки, то цикл найден
-            {    
-                break;
-            }
-            else // иначе начинаем новый цикл с новым началом
-            {
-                xStart = endX;
-                yStart = endY;
-                cycleStartX = endX;
-                cycleStartY = endY;
-                cycleIsAlmostOver = false;
-                errorSum = 0;
 
-                fout.close();
-                clear();
-                fout.open("data.txt");
-                *count = 0;
-            }
-        }
-    }
-    cout << "Error = " << errorSum << endl;
+    
 
 }
