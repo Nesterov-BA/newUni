@@ -311,6 +311,9 @@ void MyGLWidget::err_graph(){
 }
 
 void MyGLWidget::press0(){ // change function
+    
+    stepX =(b-a)/(nx-1);
+    stepY = (d-c)/(ny-1);
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
     points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
@@ -337,6 +340,9 @@ void MyGLWidget::press0(){ // change function
 }
 
 void MyGLWidget::press23(){ // change size of area
+    
+    stepX =(b-a)/(nx-1);
+    stepY = (d-c)/(ny-1);
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
     points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);
@@ -363,6 +369,9 @@ void MyGLWidget::press23(){ // change size of area
 }
 
 void MyGLWidget::press45(){ // change number of interpolation points
+    
+    stepX =(b-a)/(nx-1);
+    stepY = (d-c)/(ny-1);
     allocate();
     points(cx, cy, nx, ny, a, b, c, d);
     points(ksiX, ksiY, nx+1, ny+1, a-stepX/2, b+stepX/2, c-stepY/2, d+stepY/2);

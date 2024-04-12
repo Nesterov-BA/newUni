@@ -69,7 +69,7 @@ void MyGLWidget::allocate()
 
     F=(double*)malloc((n)*sizeof(double));
     c=(double*)malloc((n)*sizeof(double));
-    coeff = (double*)malloc((n*4)*sizeof(double));
+    coeff = (double*)malloc(((n-1)*4)*sizeof(double));
     apprVal = (double*)malloc(((n-1)*nInt+1)*sizeof(double));
     intPoints = (double*)malloc(((n-1)*nInt+1)*sizeof(double));
 }
