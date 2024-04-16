@@ -1,3 +1,5 @@
+#include <bits/types/FILE.h>
+#include <cmath>
 #include <math.h>
 #include <fstream>
 #include <iostream>
@@ -6,14 +8,16 @@ using namespace std;
 void clear();
 void Runge_Kutta4Classic(double startX, double startY, double f(double, double), double g(double, double), double h, double* endX, double* endY);
 void Runge_Kutta4StepVaried(double startX, double startY, double f(double, double), double g(double, double), double* newStep, double* endX, double* endY, double* errorSum);
-void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count);
+void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore);
+void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd);
+
 
 int maxNumberOfCycles = 5;
 bool limitedCycles = true;
 
-double tolerance = 1.e-7;
+double tolerance = 1.e-9;
 double maxStep = 1;
-double minStep = 0.5;
+double minStep = 0.1;
 double factor = 0.9;
 double* c = new double[3];
 double* b = new double[3];
@@ -101,12 +105,74 @@ void Runge_Kutta4StepVaried(double startX, double startY, double f(double, doubl
 }
 //стартуем из (0,3), прогоняем до момента, пока не станет (0, -x_0)
 
-void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), int* count)
+void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd)
 {
-    xStart = 2;
+    ofstream file("data.txt");
+    int count = 0;
+    double time = 0;
+    double step = 1;
+    double tempX, tempY;
+    double errorSum = 0;
+    file << xStart << " " << yStart << " " << time << endl;
+    while(time < finish)
+    {
+        Runge_Kutta4StepVaried(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum);
+        time += step;
+            if (yStart * tempY < 0 && ++count == 2) 
+            {   
+                *cycleTimeLess = time - step;
+                *cycleTimeMore = time;
+
+            }
+        xStart = tempX;
+        yStart = tempY;
+        file << xStart << " " << yStart << " " << time << endl;
+    }
+    *xEnd = xStart;
+    *yEnd = yStart;
+
+}
+void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
+{
+    xStart = 1;
     yStart = 0;
-
-
+    double chordStart, chordEnd, chordTemp; 
+    double cycleTimeLess, cycleTimeMore;
+    double yEnd1, yEnd2;
+    double xEnd1, xEnd2;
+    double xStartTemp, yStartTemp;
+    int count = 0;
     
+    xStartTemp = xStart;
+    yStartTemp = yStart;
+
+    solutionUpToTime(xStart, yStart, f, g, 100, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
+    while(count < 10)
+    {
+        chordStart = cycleTimeLess;
+        chordEnd = cycleTimeMore;
+        while (chordEnd - chordStart > tolerance) 
+        {
+            solutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
+            solutionUpToTime(xStartTemp, yStartTemp, f, g, chordEnd, &cycleTimeLess, &cycleTimeMore, &xEnd2, &yEnd2);
+            chordTemp = chordStart - (chordEnd-chordStart)*yEnd1/(yEnd2-yEnd1);
+            chordStart = chordEnd;
+            chordEnd = chordTemp;
+
+            // x3 = x1 - (x2-x1)*y1[1]/(y2[1]-y1[1]);
+        }
+        cout << count << endl;
+        cout << chordStart << " " << chordEnd << endl;
+        if(fabs(xStartTemp - xEnd2) < tolerance*100)
+        {
+            *xEnd = xEnd2;
+            *yEnd = yEnd2;
+            cout << "Cycle found from " << xStartTemp << "," << yStartTemp << " to " << xEnd2 << "," << yEnd2 << endl;
+            break;
+        }
+        xStartTemp = xEnd2;
+        count++;
+    }
+
 
 }

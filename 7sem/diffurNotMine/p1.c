@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<math.h>
 
+
 void f(double f_val[2], double x, double y[2]);
 void f(double f_val[2], double x, double y[2]){
     double a = 10;
@@ -52,6 +53,10 @@ int RKstep(double y[2], void (*f)(double[2], double, double[2]), double x0, doub
 int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0, double y0[2], double x_1, double tol, FILE* plot, double x_T[2]){
     double x, x_, err, h_new, h;
     double y1[2], y[2], y1_[2], y_[2], y_s[2], d[2];
+    //y_s - старт шага, который мы не трогаем, на него откатывеася если большая ошибка
+    //y1_, y_ - временные значения конца шага
+    // y - правильно посчитанное значение на конце шага, его записываем в файл
+    // y1 - то, что мы запишем в y, реально ли он нужен не понятно
     double h_ = 0.1;// первоначальная длина шага
     double fac = 0.8; // коэфициент для вычисления новой длины шага
     double facmin = 0.001;// минимальная длина шага
@@ -77,7 +82,8 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
         RKstep(y1,f,x,y,h);
         y[0] = y1[0];
         y[1] = y1[1];
-
+        // в у записан конец шага
+        //начало подсчета ошибки на шаге
         // два шага длины h_
         x_ = x;
         for(int s = 0; s < 2; s++, x_ += h_){
@@ -85,6 +91,7 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
             y_[0] = y1_[0];
             y_[1] = y1_[1];
         }
+        // в у_ запмсан результат за 2 шага
 
         //	printf("h_ = %e\n");
         for(int i = 0; i < 2; i++){
@@ -97,12 +104,15 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
         h_new = facmin > h_new ? facmin : h_new;
         h_new = facmax < h_new ? facmax : h_new;
         h_ = h_*h_new;
+        //коне подсчета ошибки на шаге
         if(err > tol){
+            //заново считаем с новым шагом
             y[0] = y_s[0];
             y[1] = y_s[1];
         }
         else{
-            if(!(x_ < x_1)){
+            if(!(x_ < x_1))
+            {
                 h = x_1-x;
                 y[0]=y_s[0];
                 y[1]=y_s[1];
@@ -113,20 +123,29 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
                     y_x1[i] = y[i];
                 }
                 break;
-
+                // если дошли до конца по времени, то выходим из цикла
             }
             y[0] = y_[0];
             y[1] = y_[1];
-            if(x_T != NULL){
+            // обновляем значение решения, записывая результат за 2 шага
+            if(x_T != NULL)
+            {
                 if(y_s[1]*y[1] < 0 && ++nT == 2){
                     x_T[0] = x;
                     x_T[1] = x_;
+                    printf("Cycle time: %f, %f\n", x_T[0], x_T[1]);
+                    // х - это время на начале шага
+                    // х_ - это время в конце шага
                 }
+                // если надо записать время цикла , то записываем
             }
             x = x_;
-            if(plot != NULL){
+            //обновляем время
+            if(plot != NULL)
+            {
                 fprintf(plot,"%lf %lf\n",y[0],y[1]);
             }
+            //записываем в файл текущее значение y
         }
 
     }
@@ -137,10 +156,14 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
     double x1,x2,x3;
     double x[2];
     double yn0[2], y1[2] , y2[2];
+    int count = 0;
+    // y1, y2 - временные массивы для хранения решений, из них гам надо только 2-е решение
     yn0[0] = y0[0];
     yn0[1] = y0[1];
+    // записали, откуда стартуем
     for(;;){
         RKsolver(y1,f,0,yn0,200,tol,NULL,x);
+        //прогоняем решение на временном интервале 0-200
         x1 = x[0]; x2 = x[1];
         do{
             RKsolver(y1,f,0,yn0, x1, tol, NULL, NULL);
@@ -148,8 +171,14 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             x3 = x1 - (x2-x1)*y1[1]/(y2[1]-y1[1]);
             x1 = x2;
             x2 = x3;
+            if(++count == 4)
+            {
+                printf("x1 = %f, x2 = %f, x2 - x1 = %f\n", x1, x2, x2 - x1);
+            }
+
         }while(fabs(x2-x1) > tolChord);
         if(fabs(yn0[0]-y2[0]) < tolCycle){
+            //старт совпадает с концом, все отлично
             y_c[0] = y2[0];
             y_c[1] = y2[1];
             break;

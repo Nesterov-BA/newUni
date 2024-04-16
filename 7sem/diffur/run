@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf obj/*
 make clean
 make
-./bin/a.out 2 0
+./bin/a.out 1 0

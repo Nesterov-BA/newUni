@@ -15,7 +15,7 @@ double dx(double x, double y)
 }
 double dy(double x, double y)
 {
-    return /*alpha*/30*(1-x*x)*y-x;
+    return /*alpha*/10*(1-x*x)*y-x;
 }
 
 int main (int argc, char** argv)
@@ -28,9 +28,14 @@ int main (int argc, char** argv)
     
     double xStart = atof(argv[1]);
     double yStart = atof(argv[2]);
+    double xEnd, yEnd;
+    double cycleL, cycleR;
     int numberOfPoints = 0;
-    findCycle(xStart, yStart, &dx, &dy, &numberOfPoints);
+    // solutionUpToTime(xStart, yStart, dx, dy, 50, &cycleL, &cycleR);
+    findCycle(xStart, yStart, dx, dy, &xEnd, &yEnd);
     cout << "Number of points: " << numberOfPoints << endl;
+    cout << "Cycle time (less): " << cycleL << endl;
+    cout << "Cycle time (more): " << cycleR << endl;
 
     return 0;
 }
