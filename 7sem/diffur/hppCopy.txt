@@ -6,6 +6,8 @@
 
 using namespace std;
 void clear();
+void Runge_Kutta4Classic(double startX, double startY, double f(double, double), double g(double, double), double h, double* endX, double* endY);
+void Runge_Kutta4StepVaried(double startX, double startY, double f(double, double), double g(double, double), double* newStep, double* endX, double* endY, double* errorSum);
 void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore);
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd);
 void Runge_Kutta4ClassicSimple(double startX, double startY, double step, double f(double, double), double g(double, double), double* endX, double* endY);
@@ -17,7 +19,7 @@ void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double,
 int maxNumberOfCycles = 5;
 bool limitedCycles = true;
 
-double tolerance = 1.e-11;
+double tolerance = 1.e-9;
 double maxStep = 3;
 double minStep = 0.00001;
 double factor = 0.8;
@@ -58,7 +60,6 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
 {
     ofstream file("data.txt");
     int count = 0;
-    int numOfPoints = 0;
     double time = 0;
     double step = 0.1;
     double tempX, tempY;
@@ -70,24 +71,26 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     {
         if(time + 2*step > finish)
         {
+            // std::cout << "remains = " << (time + step) - finish << endl;
+            // std::cout << "step = " << step << endl;
             step = (finish - time)/2;
             Runge_Kutta4ClassicSimple(xStart, yStart, step, f, g, &tempX, &tempY);
             Runge_Kutta4ClassicSimple(tempX, tempY, step, f, g, &tempX, &tempY);
-            numOfPoints+=2;
 
             done = true;
+            // cout << "end = (" << tempX << ", " << tempY << ")" << endl;
         }
         else
         {
             Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum);
-            numOfPoints+=2;
         }
 
         time += 2*step;
         
         if (yStart * tempY < 0) 
         {
-            printf("%.10f * %.10f, timeL = %f, timeR = %f, count = %d, errorSum = %e\n", yStart, tempY, time-2*step, time, count, errorSum);
+            printf("%.10f * %.10f, timeL = %f, timeR = %f, count = %d, errorSum = %f\n", yStart, tempY, time-2*step, time, count, errorSum);
+            // printf("finish = %.10f\n", finish);
         }
         if (yStart * tempY < 0 && ++count == 2) 
         {   
@@ -100,7 +103,6 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     }
     *xEnd = xStart;
     *yEnd = yStart;
-    printf("Tolerance: %e Error: %e, numOfPoints: %d\n", tolerance, errorSum, numOfPoints);
 
 }
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
@@ -122,6 +124,8 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
         solutionUpToTime(xStartTemp, yStartTemp, f, g, 50, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
         chordStart = cycleTimeLess;
         chordEnd = cycleTimeMore;
+        printf("\nchordStart = %.10f, chordEnd = %.10f, count = %d\n", chordStart, chordEnd, count);
+        // printf("In cycle \n \n");
         while (fabs(chordEnd - chordStart) > tolerance) 
         {
             solutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
@@ -131,8 +135,13 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
             chordStart = chordEnd;
             chordEnd = chordTemp;
             std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
+            // std::cout << "Cycle time in the beginning: " << cycleTimeLess << " " << cycleTimeMore << ", difference = " << -cycleTimeLess + cycleTimeMore << endl << endl;
+            // x3 = x1 - (x2-x1)*y1[1]/(y2[1]-y1[1]);
         }
         printf("\nCycle end \n");
+        // cout << "Chord: " << chordStart << " " << chordEnd << endl;
+        // printf("Precision = %.20f\n", fabs(chordEnd - chordStart));
+        // printf("PrecisionCoord = %.20f\n", fabs(xStartTemp - xEnd2));
 
         if(fabs(xStartTemp - xEnd2) < tolerance*100)
         {
@@ -168,15 +177,22 @@ void Runge_Kutta4ClassicSimple(double startX, double startY, double step, double
 
     k4x = f(startX + step*k3x, startY + step*k3y);
     k4y = g(startX + step*k3x, startY + step*k3y);
+    // printf("step = %f", step);
+    // printf("\n %.10f, %.10f", k1x, k1y);
+    // printf("\n %.10f, %.10f", k2x, k2y);
+    // printf("\n %.10f, %.10f", k3x, k3y);
+    // printf("\n %.10f, %.10f\n", k4x, k4y);
 
     *endX = startX + step/6*(k1x + 2*k2x + 2*k3x + k4x);
     *endY = startY + step/6*(k1y + 2*k2y + 2*k3y + k4y);
+    // printf("(%.10f, %.10f) -> (%.10f, %.10f)\n", startX, startY, *endX, *endY);
 
 }
 
 void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum)
 {
     double err = 1;
+    // int count = 0;
     double tempEndX, tempEndY;
     double stepFac;
     while (err > tolerance)
@@ -190,15 +206,22 @@ void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double,
 
         double dX = fabs(*endX+(*endX-tempEndX)/(16-1));
         double dY = fabs(*endY+(*endY-tempEndY)/(16-1));
+        // printf("after 2 steps (%f, %f), after 1 double (%f, %f)\n", *endX, *endY, tempEndX, tempEndY);
 
         err = fabs((*endX-tempEndX)/dX) > fabs((*endY-tempEndY)/dY) ? fabs((*endX-tempEndX)/dX) : fabs((*endY-tempEndY)/dY);
+        // printf("Error: %.20f\n", err);
         err /= (16-1);
         stepFac = factor*pow((tolerance/err),(double)1/(4+1));
         stepFac = minStep > stepFac ? minStep : stepFac;
         stepFac = maxStep < stepFac ? maxStep : stepFac;
+        // printf("Step: %.20f\n", *step);
+        // printf("StepFac: %.20f\n\n", stepFac);
         *step = *step*stepFac;
     }
+    // printf("Count of tries= %d\n", count);
 
+    // printf("StepFac: %.20f\n", stepFac);
+    // printf("Error: %.20f\n", err);
     *errorSum += err;
   
 }
