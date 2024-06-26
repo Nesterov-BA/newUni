@@ -9,10 +9,13 @@ void clear();
 void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore);
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd);
 void Runge_Kutta4ClassicSimple(double startX, double startY, double step, double f(double, double), double g(double, double), double* endX, double* endY);
-void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum);
+void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum, double* globalError, double* globalErrorRegular);
+double logNormCalc(double x1, double y1, double x2, double y2, double step);
+double regNormCalc(double x1, double y1, double x2, double y2, double step);
 
 
 
+double alpha = 10;
 
 int maxNumberOfCycles = 5;
 bool limitedCycles = true;
@@ -57,6 +60,8 @@ void clear()
 void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd)
 {
     ofstream file("data.txt");
+    ofstream fileErr("errorLog.txt");
+    ofstream fileErrReg("errorRegular.txt");
     int count = 0;
     int numOfPoints = 0;
     double time = 0;
@@ -64,6 +69,8 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     double tempX, tempY;
     double err = 0;
     double errorSum = 0;
+    double globalError = 0;
+    double globalErrorRegular = 0;
     bool done = false;
     file << xStart << " " << yStart << " " << time << endl;
     while(time < finish)
@@ -79,7 +86,7 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
         }
         else
         {
-            Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum);
+            Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum, &globalError, &globalErrorRegular);
             numOfPoints+=2;
         }
 
@@ -94,13 +101,16 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
             *cycleTimeLess = time - 2*step;
             *cycleTimeMore = time;
         }
+        fileErr << globalError << " " << logNormCalc(xStart, yStart, tempX, tempY, step) << " " << time << endl;
+        fileErrReg << globalErrorRegular << " " << regNormCalc(xStart, yStart, tempX, tempY, step) << " " << time << endl;
         xStart = tempX;
         yStart = tempY;
         file << xStart << " " << yStart << " " << time << endl;
+        
     }
     *xEnd = xStart;
     *yEnd = yStart;
-    printf("Tolerance: %e Error: %e, numOfPoints: %d\n", tolerance, errorSum, numOfPoints);
+    printf("Tolerance: %e Error: %e, numOfPoints: %d, globalError: %e, globalErrorReg: %e\n", tolerance, errorSum, numOfPoints, globalError, globalErrorRegular);
 
 }
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
@@ -174,9 +184,10 @@ void Runge_Kutta4ClassicSimple(double startX, double startY, double step, double
 
 }
 
-void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum)
+void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum, double* globalError, double* globalErrorRegular)
 {
     double err = 1;
+    double logNorm = 0;
     double tempEndX, tempEndY;
     double stepFac;
     while (err > tolerance)
@@ -198,7 +209,11 @@ void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double,
         stepFac = maxStep < stepFac ? maxStep : stepFac;
         *step = *step*stepFac;
     }
-
+    
+    *globalError *= exp(logNormCalc(startX, startY, *endX, *endY, *step));
+    *globalError += err;
+    *globalErrorRegular *= exp(regNormCalc(startX, startY, *endX, *endY, *step));
+    *globalErrorRegular += err;
     *errorSum += err;
   
 }
@@ -217,4 +232,44 @@ void checkCycle(double f(double, double), double g(double, double))
     solutionUpToTime(xStart, yStart, f, g, tStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
     solutionUpToTime(xStart, yStart, f, g, tEnd, &cycleTimeLess, &cycleTimeMore, &xEnd2, &yEnd2);
     printf("ends: %.10f, %.10f\n", yEnd1, yEnd2);
+}
+
+double logNormCalc(double x1, double y1, double x2, double y2, double step)
+{
+    double logNorm = 0;
+    double a1 = -alpha*x1*y1; 
+    double b1 = alpha*(1-x1*x1)/2;
+    double a2 = -alpha*x2*y2; 
+    double b2 = alpha*(1-x2*x2)/2;
+    double D1 = b1*b1 + 4*a1*a1;
+    double D2 = b2*b2 + 4*a2*a2;
+    double lambda11 = (b1 + sqrt(D1))/2;
+    double lambda21 = (b1 - sqrt(D1))/2;
+    double lambda12 = (b2 + sqrt(D2))/2;
+    double lambda22 = (b2 - sqrt(D2))/2;
+
+    logNorm = step*max(max(abs(lambda11), abs(lambda12)), max(abs(lambda21), abs(lambda22)));
+    return logNorm;
+
+}
+
+double regNormCalc(double x1, double y1, double x2, double y2, double step)
+{
+    double norm = 0;
+    double a1 = 1; 
+    double b1 = alpha*(1-x1*x1);
+    double c1 = alpha*(1-x1*x1)*alpha*(1-x1*x1) + (2*alpha*x1*y1 + 1)*(2*alpha*x1*y1 + 1);
+    double a2 = 1; 
+    double b2 = alpha*(1-x2*x2);
+    double c2 = alpha*(1-x2*x2)*alpha*(1-x2*x2) + (2*alpha*x2*y2 + 1)*(2*alpha*x2*y2 + 1);
+    double D1 = (a1+c1)*(a1+c1) + 4*b1*b1;
+    double D2 = (a2+c2)*(a2+c2) + 4*b2*b2;
+    double lambda11 = (a1+c1 + sqrt(D1))/2;
+    double lambda21 = (a1+c1 - sqrt(D1))/2;
+    double lambda12 = (a2+c2 + sqrt(D2))/2;
+    double lambda22 = (a2+c2 - sqrt(D2))/2;
+
+    norm = step*max(max(abs(lambda11), abs(lambda12)), max(abs(lambda21), abs(lambda22)));
+    return norm;
+
 }

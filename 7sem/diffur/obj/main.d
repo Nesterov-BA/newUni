@@ -1,1 +1,3 @@
-main.o: src/main.cpp src/rungeKutta.hpp
+-MM
+src/main.cpp
+cpp src/rungeKutta.hpp

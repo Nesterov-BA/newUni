@@ -5,7 +5,7 @@
 
 using namespace std;
 
-double alpha = 10;
+
 
 double dx(double x, double y);
 double dy(double x, double y);
