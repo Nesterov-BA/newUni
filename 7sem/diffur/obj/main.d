@@ -1,3 +1,1 @@
--MM
-src/main.cpp
-cpp src/rungeKutta.hpp
+main.o: src/main.cpp src/rungeKutta.hpp src/normCalculation.hpp
