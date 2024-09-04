@@ -1,11 +1,11 @@
 #include <math.h>
 #include <cmath>
 
-double * solveQuadratic(double a, double b, double c);
+double* solveQuadratic(double a, double b, double c);
 double logNormCalc(double x1, double y1, double x2, double y2, double step);
 double regNormCalc(double x1, double y1, double x2, double y2, double step);
 
-double alpha = 10;
+double alpha;
 
 
 double logNormCalc(double x1, double y1, double x2, double y2, double step)
@@ -64,3 +64,10 @@ double* solveQuadratic(double a, double b, double c)
     }
     return x;
 }
+/*
+double* calculateEigen2by2(double* matrix)
+{
+    double* eigenvector = new double[2];
+    eigenvector = solveQuadratic(1, ); 
+}
+*/
