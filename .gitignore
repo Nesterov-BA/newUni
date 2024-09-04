@@ -1,4 +1,5 @@
 7sem/partDiffEq/*.txt
+7sem/diffur/*.txt
 7sem/diffur/plotst.ipynb
 7sem/diffur/run
 7sem/diffur/data.txt
@@ -11,3 +12,7 @@
 7sem/partDiffEq/bin/a.out
 7sem/partDiffEq/obj/main.d
 7sem/partDiffEq/obj/main.o
+8sem/bin/a.out
+8sem/obj/*.d
+8sem/obj/*.o
+
