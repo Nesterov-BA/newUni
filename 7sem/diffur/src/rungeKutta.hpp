@@ -14,7 +14,6 @@ void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double,
 
 int maxNumberOfCycles = 5;
 bool limitedCycles = true;
-
 double tolerance = 1.e-11;
 double maxStep = 3;
 double minStep = 0.00001;
@@ -57,16 +56,15 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     ofstream file("data.txt");
     ofstream fileErr("errorLog.txt");
     ofstream fileErrReg("errorRegular.txt");
+    ofstream numberOfPoints("numberOfPoints.txt");
     int count = 0;
     int numOfPoints = 0;
     double time = 0;
     double step = 0.1;
     double tempX, tempY;
-    double err = 0;
     double errorSum = 0;
     double globalError = 0;
     double globalErrorRegular = 0;
-    bool done = false;
     file << xStart << " " << yStart << " " << time << endl;
     while(time < finish)
     {
@@ -77,12 +75,11 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
             Runge_Kutta4ClassicSimple(tempX, tempY, step, f, g, &tempX, &tempY);
             numOfPoints+=2;
 
-            done = true;
         }
         else
         {
             Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum, &globalError, &globalErrorRegular);
-            numOfPoints+=2;
+            numOfPoints++;
         }
 
         time += 2*step;
@@ -106,7 +103,7 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     *xEnd = xStart;
     *yEnd = yStart;
     printf("Tolerance: %e Error: %e, numOfPoints: %d, globalError: %e, globalErrorReg: %e\n", tolerance, errorSum, numOfPoints, globalError, globalErrorRegular);
-
+    numberOfPoints << numOfPoints;
 }
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
 {
@@ -182,7 +179,6 @@ void Runge_Kutta4ClassicSimple(double startX, double startY, double step, double
 void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double, double), double g(double, double), double* step, double* endX, double* endY, double* errorSum, double* globalError, double* globalErrorRegular)
 {
     double err = 1;
-    double logNorm = 0;
     double tempEndX, tempEndY;
     double stepFac;
     while (err > tolerance)
@@ -217,9 +213,8 @@ void checkCycle(double f(double, double), double g(double, double))
 {
     double xStart = 1;
     double yStart = 0;
-    double xEnd, yEnd, err, cycleTimeLess, cycleTimeMore;
+    double xEnd, yEnd, cycleTimeLess, cycleTimeMore;
     double xEnd1, yEnd1, xEnd2, yEnd2;
-    double step = 1;
     solutionUpToTime(xStart, yStart, f, g, 50, &cycleTimeLess, &cycleTimeMore, &xEnd, &yEnd);
     printf("\ncycle1: %.10f, %.10f\n", cycleTimeLess, cycleTimeMore);
     double tStart = cycleTimeLess;

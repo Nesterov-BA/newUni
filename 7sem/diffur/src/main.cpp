@@ -26,12 +26,11 @@ int main (int argc, char** argv)
         cout << "Usage: " << argv[0] << " <xStart> <yStart>" << endl;
         return 1;
     }
-    double step = 0.1;
-    double errSum = 0;
     double xStart = atof(argv[1]);
     double yStart = atof(argv[2]);
     double xEnd, yEnd;
-    double cycleL, cycleR;
+    printf("Set alpha:\n");
+    std::cin >> alpha;
     int numberOfPoints = 0;
     // solutionUpToTime(xStart, yStart, dx, dy, 10, &cycleL, &cycleR, &xEnd, &yEnd);
     // checkCycle(dx, dy);
@@ -39,8 +38,6 @@ int main (int argc, char** argv)
     // printf("Step = %f\n", step);
     findCycle(xStart, yStart, dx, dy, &xEnd, &yEnd);
     cout << "Number of points: " << numberOfPoints << endl;
-    cout << "Cycle time (less): " << cycleL << endl;
-    cout << "Cycle time (more): " << cycleR << endl;
     
 
     return 0;
