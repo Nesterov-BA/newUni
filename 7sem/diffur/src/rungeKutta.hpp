@@ -82,7 +82,7 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
         else
         {
             Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum, &globalError, &globalErrorRegular);
-            numOfPoints+=2;
+            numOfPoints++;
         }
 
         time += 2*step;
@@ -106,7 +106,7 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     *xEnd = xStart;
     *yEnd = yStart;
     printf("Tolerance: %e Error: %e, numOfPoints: %d, globalError: %e, globalErrorReg: %e\n", tolerance, errorSum, numOfPoints, globalError, globalErrorRegular);
-
+    file << numOfPoints;
 }
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
 {
