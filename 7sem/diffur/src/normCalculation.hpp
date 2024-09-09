@@ -4,6 +4,7 @@
 double* solveQuadratic(double a, double b, double c);
 double logNormCalc(double x1, double y1, double x2, double y2, double step);
 double regNormCalc(double x1, double y1, double x2, double y2, double step);
+double max4(double x1, double x2, double x3, double x4);
 
 double alpha;
 
@@ -21,7 +22,7 @@ double logNormCalc(double x1, double y1, double x2, double y2, double step)
     c2 = -c2*c2;
     lambda1 = solveQuadratic(1, b1, c1);
     lambda2 = solveQuadratic(1, b2, c2);
-    logNorm = step*std::max(std::max(fabs(lambda1[0]), fabs(lambda1[1])),std::max(fabs(lambda2[0]), fabs(lambda2[1])));
+    logNorm = step*max4(lambda1[0], lambda1[1], lambda2[0], lambda2[1]);
     return logNorm;
 
 }
@@ -52,22 +53,22 @@ double* solveQuadratic(double a, double b, double c)
 {
     double* x = new double[2];
     double D = b*b - 4*a*c;
-    if (D > 0)
-    {
-        x[0] = (-b + sqrt(D))/(2*a);
-        x[1] = (-b - sqrt(D))/(2*a);
-    }
-    else if (D == 0)
-    {
-        x[0] = -b/(2*a);
-        x[1] = -b/(2*a);
-    }
+    x[0] = (-b + sqrt(D))/(2*a);
+    x[1] = (-b - sqrt(D))/(2*a);
     return x;
 }
-/*
+
 double* calculateEigen2by2(double* matrix)
 {
     double* eigenvector = new double[2];
-    eigenvector = solveQuadratic(1, ); 
+    double a = 1;
+    double b = matrix[0] + matrix[3];
+    double c = matrix[0] * matrix[3] - matrix[1] * matrix[2];
+    eigenvector = solveQuadratic(a, b, c);
+    return eigenvector;
 }
-*/
+
+double max4(double x1, double x2, double x3, double x4)
+{
+    return std::max(std::max(x1, x2), std::max(x3, x4));
+}

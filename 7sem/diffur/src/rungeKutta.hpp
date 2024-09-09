@@ -80,14 +80,13 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
         {
             Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum, &globalError, &globalErrorRegular);
             numOfPoints++;
-            numOfPoints++;
         }
 
         time += 2*step;
         
         if (yStart * tempY < 0) 
         {
-            printf("%.10f * %.10f, timeL = %f, timeR = %f, count = %d, errorSum = %e\n", yStart, tempY, time-2*step, time, count, errorSum);
+            //printf("%.10f * %.10f, timeL = %f, timeR = %f, count = %d, errorSum = %e\n", yStart, tempY, time-2*step, time, count, errorSum);
         }
         if (yStart * tempY < 0 && ++count == 2) 
         {   
@@ -123,31 +122,33 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
     while(count < 100)
     {
         solutionUpToTime(xStartTemp, yStartTemp, f, g, 50, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
+        printf("This was a trash cycle!\n");
         chordStart = cycleTimeLess;
         chordEnd = cycleTimeMore;
         while (fabs(chordEnd - chordStart) > tolerance) 
         {
             solutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
             solutionUpToTime(xStartTemp, yStartTemp, f, g, chordEnd, &cycleTimeLess, &cycleTimeMore, &xEnd2, &yEnd2);
-            printf("(%.10f, %.10f), (%.10f, %.10f)\n", xEnd1, yEnd1, xEnd2, yEnd2);
+            //printf("(%.10f, %.10f), (%.10f, %.10f)\n", xEnd1, yEnd1, xEnd2, yEnd2);
             chordTemp = chordStart - (chordEnd-chordStart)*yEnd1/(yEnd2-yEnd1);
             chordStart = chordEnd;
             chordEnd = chordTemp;
-            std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
+            //std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
         }
-        printf("\nCycle end \n");
+        //printf("\nCycle end \n");
 
         if(fabs(xStartTemp - xEnd2) < tolerance*100)
         {
             *xEnd = xEnd2;
             *yEnd = yEnd2;
-            cout << "Cycle found from " << xStartTemp << "," << yStartTemp << " to " << xEnd2 << "," << yEnd2 << endl;
-            std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
+            //cout << "Cycle found from " << xStartTemp << "," << yStartTemp << " to " << xEnd2 << "," << yEnd2 << endl;
+            //std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
             
             solutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
             
             break;
         }
+        printf("Difference = %.11lf\n", fabs(xStartTemp - xEnd2));
         xStartTemp = xEnd2;
         count++;
     }
@@ -217,11 +218,11 @@ void checkCycle(double f(double, double), double g(double, double))
     double xEnd, yEnd, cycleTimeLess, cycleTimeMore;
     double xEnd1, yEnd1, xEnd2, yEnd2;
     solutionUpToTime(xStart, yStart, f, g, 50, &cycleTimeLess, &cycleTimeMore, &xEnd, &yEnd);
-    printf("\ncycle1: %.10f, %.10f\n", cycleTimeLess, cycleTimeMore);
+    //printf("\ncycle1: %.10f, %.10f\n", cycleTimeLess, cycleTimeMore);
     double tStart = cycleTimeLess;
     double tEnd = cycleTimeMore;
     solutionUpToTime(xStart, yStart, f, g, tStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
     solutionUpToTime(xStart, yStart, f, g, tEnd, &cycleTimeLess, &cycleTimeMore, &xEnd2, &yEnd2);
-    printf("ends: %.10f, %.10f\n", yEnd1, yEnd2);
+    //printf("ends: %.10f, %.10f\n", yEnd1, yEnd2);
 }
 

@@ -67,7 +67,7 @@ void residual(double *x, double *r, double eps){
     r[0] = x_tmp[0];
     r[1] = x_tmp[2];
 }
-
+// manhattan metric
 double metric(double* x, double* y, int k){
     double res =0;
     for (int i=0; i<k; i++){
@@ -248,22 +248,25 @@ double shooting(double *x, double eps){
         double gamma = 1;
         double tmp;
         while (true){
+            printf("Gamma = %.20lf\n", gamma);
             for(int i=0;i<m;i++){
                 p[i] = p_old[i] - b[i]*gamma;
             }
             
             residual(x, r, eps);
             tmp = norm(r, m);
+            printf("difference = %.20lf\n", norm(r,m)-norm(r_old,m));
             if (norm(r, m)<eps){
                 return counter;
             }
-            else if (norm(r, m) < norm(r_old, m)){
+            else if (norm(r,m)-norm(r_old,m) < eps){
                 break;
             }
             else if (gamma>1e-20){
                 gamma = gamma/2;
             }
             else {
+                printf("%lf\n", gamma);
                 throw std::runtime_error("Gamma less then eps");
             }
 
