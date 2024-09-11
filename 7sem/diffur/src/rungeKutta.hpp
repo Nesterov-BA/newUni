@@ -103,7 +103,9 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
     *xEnd = xStart;
     *yEnd = yStart;
     printf("Tolerance: %e Error: %e, numOfPoints: %d, globalError: %e, globalErrorReg: %e\n", tolerance, errorSum, numOfPoints, globalError, globalErrorRegular);
-    file << numOfPoints;    numberOfPoints << numOfPoints;
+    numberOfPoints << numOfPoints;
+
+
 }
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
 {
@@ -203,9 +205,9 @@ void Runge_Kutta4StepVariedSimple(double startX, double startY, double f(double,
         *step = *step*stepFac;
     }
     
-    *globalError *= exp(logNormCalc(startX, startY, *endX, *endY, *step));
+    *globalError *= exp(*step*logNormCalc(startX, startY, *endX, *endY, *step));
     *globalError += err;
-    *globalErrorRegular *= exp(regNormCalc(startX, startY, *endX, *endY, *step));
+    *globalErrorRegular *= exp(*step*regNormCalc(startX, startY, *endX, *endY, *step));
     *globalErrorRegular += err;
     *errorSum += err;
   
