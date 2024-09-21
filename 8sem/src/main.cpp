@@ -33,12 +33,17 @@ int main(int argc, char** argv)
         dx1,
         dx2
    };
-   double p1 = 1;
-   double p2 = 0;
-   double x1 = 1;
-   double x2 = 0;
+   double finish = 2;
+   double* start = new double[4];
+   double* end = new double[4];
+   start[0] = 1;
+   start[1] = 1;
+   start[2] = 1;
+   start[3] = 1;
    for(int i = 0; i < 4; i++)
-        printf("%lf\n", functions[i](p1, p2, x1, x2));
-    return 0;
+   {
+        printf("%lf\n", functions[i](start[0], start[1], start[2], start[3]));
+   }
+   solutionUpToTime(start, end, functions, finish);
+   return 0;
 }
-    

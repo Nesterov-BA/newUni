@@ -12,4 +12,6 @@
 7sem/partDiffEq/obj/main.o
 8sem/obj
 8sem/bin
-
+8sem/*.txt
+8sem/*.csv
+8sem/plotst.ipynb

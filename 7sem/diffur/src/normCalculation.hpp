@@ -51,7 +51,7 @@ double regNormCalc(double x1, double y1, double x2, double y2, double step)
     return sqrt(regNorm);
 
 }
-
+//solve ax^2+bx+c=0
 double* solveQuadratic(double a, double b, double c)
 {
     double* x = new double[2];
@@ -63,7 +63,7 @@ double* solveQuadratic(double a, double b, double c)
     // x[1] = -b-x[0];
     return x;
 }
-
+//eigenvalues of a 2x2 matrix
 double* calculateEigen2by2(double* matrix)
 {
     double* eigenvector = new double[2];
@@ -76,5 +76,5 @@ double* calculateEigen2by2(double* matrix)
 
 double max4(double x1, double x2, double x3, double x4)
 {
-    return std::max(std::max(fabs(x1), fabs(x2)), std::max(fabs(x3), fabs(x4)));
+    return std::fmax(std::fmax(fabs(x1), fabs(x2)), std::fmax(fabs(x3), fabs(x4)));
 }
