@@ -2,9 +2,9 @@
 
 int maxNumberOfCycles = 5;
 bool limitedCycles = true;
-double tolerance = 1.e-11;
+// tolerance = 1.e-11;
 double maxStep = 3;
-double minStep = 0.0001;
+double minStep = 0.00001;
 double factor = 0.8;
 double* c = new double[3];
 double* b = new double[3];
@@ -102,7 +102,7 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
      double errorSum = 0;
      double globalError = 0;
      double globalErrorRegular = 0;
-     file << "p1,x1,p2,x2,time" << endl;
+     file << "p1,p2,x1,x2,time" << endl;
 
      for (int i = 0; i < 4; i++) {
          file << start[i] << ",";
@@ -134,5 +134,9 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
          }
          file << time << endl;
      }
-     printf("Number of points: %d\n", numOfPoints);
+     for(int i = 0; i < 4; i++)
+     {
+         end[i] = tempEnd[i];
+     }
+     printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
  }

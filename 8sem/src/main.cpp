@@ -1,4 +1,5 @@
 #include "rungeKutta.hpp"
+#include "shooting.hpp"
 // #include "normCalculation.hpp"
 #include <iostream>
 
@@ -24,8 +25,20 @@ double dx2(double p1, double p2, double x1, double x2)
     return p2*x1*x1;
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char* argv[]) 
 {
+   double finish = 2;
+   double* start = new double[4];
+   double* end = new double[4];
+   double initialP1[20];
+   double initialP2[20];
+   FILE *startFile = fopen("start.csv", "r");
+   FILE *errors = fopen("errors.csv", "w");
+   if(fscanf(startFile, "%lf,%lf,%lf,%lf", &start[0], &start[1], &start[2], &start[3]) != 4)
+   {
+        printf("Error reading start file");
+        return 1;
+   }
    function functions[] = 
    {
         dp1,
@@ -33,17 +46,28 @@ int main(int argc, char** argv)
         dx1,
         dx2
    };
-   double finish = 2;
-   double* start = new double[4];
-   double* end = new double[4];
-   start[0] = 1;
-   start[1] = 1;
-   start[2] = 1;
-   start[3] = 1;
-   for(int i = 0; i < 4; i++)
+   tolerance = 1.e-11;
+   if(argc > 1)
    {
-        printf("%lf\n", functions[i](start[0], start[1], start[2], start[3]));
+        tolerance = atof(argv[1]);
    }
+//    start[0] = 1;
+//    start[1] = 0;
+//    start[2] = 1;
+//    start[3] = 0;
    solutionUpToTime(start, end, functions, finish);
+   printf("Error vector:(%lf,%lf)\n", fabs(end[2]), fabs(end[3]+1));
+   for(int i = 0; i < 20; i++)
+   {
+        initialP1[i] = 0.1*i - 1;
+        initialP2[i] = 0.1*i - 1;
+   }
+   for(int i = 0; i < 20; i++)
+   { 
+        for(int j = 0; j < 20; j++)
+        {
+            fprintf(errors, "%lf,%lf,%lf\n", initialP1[i], initialP2[j], error(initialP1[i], initialP2[j], functions));
+        }
+   }
    return 0;
 }

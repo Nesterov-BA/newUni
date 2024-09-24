@@ -1,5 +1,7 @@
 import csv
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 
 def convert_csv_to_float_arrays(filename):
@@ -34,44 +36,42 @@ def convert_csv_to_float_arrays(filename):
         print(f"An error occurred: {str(e)}")
         return None, None
 
-# Usage
-column_names, arrays = convert_csv_to_float_arrays('data.csv')
+def plot_data(x, y, z, interpolated=False):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-if column_names and arrays:
-    print("Column names:", column_names)
-    
-    # Print first 5 elements of each array
-    for i, array in enumerate(arrays):
-        print(f"\nArray {i+1} ({column_names[i]}):")
-        print(array[:5])  # Print first 5 elements
-        
-        # Print every 100th element
-        print("\nEvery 100th element:")
-        hundredth_elements = array[99::100]  # Start from 99th index (100th element) and take every 100th element
-        print(hundredth_elements[:10])  # Print first 10 elements (or less if available)
-        
-        # Print total number of elements
-        print(f"\nTotal elements in array: {len(array)}")
-        
-        # Print data type of the array
-        print(f"Data type of array: {array.dtype}")
-        
-        # Print summary statistics
-        print(f"Mean: {np.mean(array):.4f}, Median: {np.median(array):.4f}, Standard Deviation: {np.std(array):.4f}")
+    if interpolated:
+        # Define a grid of points where you want to interpolate the data
+        grid_x, grid_y = np.mgrid[min(x):max(x):100j, min(y):max(y):100j]
 
-# If no arrays were returned, print an error message
-else:
-    print("No data was loaded successfully.")
+        # Interpolate the data onto the grid
+        grid_z = griddata((x, y), z, (grid_x, grid_y), method='cubic')
+
+        # Create a surface plot
+        ax.plot_surface(grid_x, grid_y, grid_z, cmap='viridis')
+    else:
+        # Create a  3D scatter plot
+        ax.scatter(x, y, z)
+
+    # Set labels for the axes
+    ax.set_xlabel('X')
+    ax.set_ylabel('T')
+    ax.set_zlabel('U')
+
+    # Show the plot
+    plt.savefig('errors.png')
+    plt.show()
 
 # Usage
 column_names, arrays = convert_csv_to_float_arrays('data.csv')
+column_names_err, arrays_err = convert_csv_to_float_arrays('errors.csv')
 time = arrays[4]
 if column_names and arrays:
     print("Column names:", column_names)
     for i, array in enumerate(arrays):
-        print(len(array))
-        print(f"\nArray {i+1} ({column_names[i]}):")
-        print(array[:5])  # Print first 5 elements of each array
-        plt.plot(time,array)
-        plt.show()
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plot.png')
+plot_data(arrays_err[0], arrays_err[1], arrays_err[2], interpolated=True)
 
