@@ -54,9 +54,9 @@ def plot_data(x, y, z, interpolated=False):
         ax.scatter(x, y, z)
 
     # Set labels for the axes
-    ax.set_xlabel('X')
-    ax.set_ylabel('T')
-    ax.set_zlabel('U')
+    ax.set_xlabel('p1')
+    ax.set_ylabel('p2')
+    ax.set_zlabel('error')
 
     # Show the plot
     plt.savefig('errors.png')
@@ -73,5 +73,7 @@ if column_names and arrays:
             plt.plot(time,array, label=column_names[i])
 plt.legend()
 plt.savefig('plot.png')
-plot_data(arrays_err[0], arrays_err[1], arrays_err[2], interpolated=True)
-
+plt.close()
+plt.plot(arrays_err[0],arrays_err[1], label='error')
+plt.legend()
+plt.savefig('errors.png')

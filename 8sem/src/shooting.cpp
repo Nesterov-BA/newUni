@@ -18,11 +18,11 @@ void shooting(double* start, double alpha, function* functions, double finish)
         solutionUpToTime(start, end, functions, finish);
 }
 
-double error(double p1, double p2, function* functions)
+double error(double p1, double p2, function* functions, double alpha)
 {
-    double start[4] = {p1, p1, 1, 1};
+    double start[4] = {p1, p1, alpha, 1};
     double end[4];
     double finish = 2;
     solutionUpToTime(start, end, functions, finish);
-    return fabs(end[2]) + fabs(end[3] + 1);
+    return sqrt(end[2]*end[2] + (end[3]+alpha)*(end[3]+alpha));
 }

@@ -14,7 +14,7 @@ void Runge_Kutta4StepVariedSimple(double* start, double* end, function* function
 
 void shooting(double* start, double alpha, function* functions, double finish);
 
-double error(double p1, double p2, function* functions);
+double error(double p1, double p2, function* functions, double alpha);
 
 
 
