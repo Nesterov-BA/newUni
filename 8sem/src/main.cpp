@@ -1,5 +1,6 @@
 #include "rungeKutta.hpp"
 #include "shooting.hpp"
+#include "gaussian.hpp"
 // #include "normCalculation.hpp"
 #include <iostream>
 
@@ -63,9 +64,17 @@ int main(int argc, char* argv[])
         initialP2[i] = 0.1*i - 2;
    }
    double alpha = argc > 2 ? atof(argv[2]) : 1;
-   for(int i = 0; i < 40; i++)
-   { 
-         fprintf(errors, "%lf,%lf\n", initialP1[i],error(initialP1[i], 0, functions, alpha));
-   }
+//    for(int i = 0; i < 40; i++)
+//    { 
+//          fprintf(errors, "%lf,%lf\n", initialP1[i],error(initialP1[i], 0, functions, alpha));
+//    }
+    double vec[3] = {1, 2, 3};\
+    gaussian(vec);
+    printf("Gaussian:\n");
+    for(int i = 0; i < 3; i++)
+    {
+        printf("%lf ", vec[i]);
+    }
+    printf("\n");
    return 0;
 }
