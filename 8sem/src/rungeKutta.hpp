@@ -5,6 +5,8 @@
 // #include "normCalculation.hpp"
 
 inline double tolerance;
+inline double alpha;
+inline double finish;
 typedef double (*function)(double, double, double, double);
 
 using namespace std;

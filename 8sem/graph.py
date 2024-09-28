@@ -60,7 +60,6 @@ def plot_data(x, y, z, interpolated=False):
 
     # Show the plot
     plt.savefig('errors.png')
-    plt.show()
 
 # Usage
 column_names, arrays = convert_csv_to_float_arrays('data.csv')
@@ -74,6 +73,8 @@ if column_names and arrays:
 plt.legend()
 plt.savefig('plot.png')
 plt.close()
-plt.plot(arrays_err[0],arrays_err[1], label='error')
-plt.legend()
-plt.savefig('errors.png')
+arrays_err = np.array(arrays_err)
+print(arrays_err.shape)
+arrays_err = arrays_err[:,abs(arrays_err[2]) < 10]
+print(arrays_err.shape)
+plot_data(arrays_err[0], arrays_err[1], arrays_err[2], True)
