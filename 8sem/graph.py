@@ -36,7 +36,10 @@ def convert_csv_to_float_arrays(filename):
         print(f"An error occurred: {str(e)}")
         return None, None
 
-def plot_data(x, y, z, interpolated=False):
+def plot_data(arrays, labels, filename, interpolated=False):
+    x = arrays[0]
+    y = arrays[1]
+    z = arrays[2]
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -54,16 +57,18 @@ def plot_data(x, y, z, interpolated=False):
         ax.scatter(x, y, z)
 
     # Set labels for the axes
-    ax.set_xlabel('p1')
-    ax.set_ylabel('p2')
-    ax.set_zlabel('error')
+    ax.set_xlabel(labels[0])
+    ax.set_ylabel(labels[1])
+    ax.set_zlabel(labels[2])
 
     # Show the plot
-    plt.savefig('errors.png')
+    plt.savefig(filename)
 
 # Usage
 column_names, arrays = convert_csv_to_float_arrays('data.csv')
-column_names_err, arrays_err = convert_csv_to_float_arrays('errors.csv')
+column_names_err, arrays_err = convert_csv_to_float_arrays('errorGraph.csv')
+newton_names, newton = convert_csv_to_float_arrays('newton.csv')
+
 time = arrays[4]
 if column_names and arrays:
     print("Column names:", column_names)
@@ -77,4 +82,6 @@ arrays_err = np.array(arrays_err)
 print(arrays_err.shape)
 arrays_err = arrays_err[:,abs(arrays_err[2]) < 10]
 print(arrays_err.shape)
-plot_data(arrays_err[0], arrays_err[1], arrays_err[2], True)
+plot_data(arrays_err,column_names_err,'errors.png', True)
+plot_data(newton,newton_names,'newton.png', False)
+print(arrays_err[:,arrays_err[2] == arrays_err[2].min()])

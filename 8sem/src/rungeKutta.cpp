@@ -87,13 +87,60 @@ void Runge_Kutta4ClassicSimple(double* start, double* end, function* functions, 
         end[i] = start[i] + step/6*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i]);
     }
 }
+void solutionReverse(double* start, double* end, function* functions, double finish)
+{
+     ofstream file("data.csv");
+     int count = 0;
+     int numOfPoints = 0;
+     double time = finish;
+     double step = -0.1;
+     double* tempEnd = new double[4];
+     double errorSum = 0;
+     double globalError = 0;
+     double globalErrorRegular = 0;
+     file << "p1,p2,x1,x2,time" << endl;
+
+     for (int i = 0; i < 4; i++) {
+         file << end[i] << ",";
+     }
+     file << time << endl;
+     while(time>0)
+     {
+         if(time +step < 0)
+         {
+             step = (-time)/2;
+             Runge_Kutta4ClassicSimple(end, tempEnd, functions, step);
+             Runge_Kutta4ClassicSimple(tempEnd, tempEnd, functions, step);
+             numOfPoints+=2;
+             time += 2*step;
+         }
+         else
+         {
+             Runge_Kutta4StepVariedSimple(end, tempEnd, functions, &step);
+             time += step;
+             numOfPoints++;
+         }
+
+         //fileErr << globalError << " " << logNormCalc(xStart, yStart, tempX, tempY, step) << " " << time << endl;
+         //fileErrReg << globalErrorRegular << " " << regNormCalc(xStart, yStart, tempX, tempY, step) << " " << time << endl;
+         for (int i = 0; i < 4; i++)
+         {
+             file << tempEnd[i] << ",";
+             end[i] = tempEnd[i];
+         }
+         file << time << endl;
+     }
+     for(int i = 0; i < 4; i++)
+     {
+         start[i] = tempEnd[i];
+     }
+     //printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
+ }
+
 
 void solutionUpToTime(double* start, double* end, function* functions, double finish)
  {
      ofstream file("data.csv");
-     ofstream fileErr("errorLog.txt");
-     ofstream fileErrReg("errorRegular.txt");
-     ofstream numberOfPoints("numberOfPoints.txt");
      int count = 0;
      int numOfPoints = 0;
      double time = 0;
@@ -138,5 +185,5 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
      {
          end[i] = tempEnd[i];
      }
-     printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
+     //printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
  }
