@@ -1,3 +1,4 @@
 #!/bin/bash
 clear
-./bin/a.out 1 1
+./bin/a.out $1 $2
+python3 graph.py

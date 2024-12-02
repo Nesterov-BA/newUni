@@ -48,6 +48,7 @@ int RKstep(double y[2], void (*f)(double[2], double, double[2]), double x0, doub
     for(int i = 0; i < 2; i++){
         y[i] = y[i]+(k1[i]+2*k2[i]+2*k3[i]+k4[i])/6;
     }
+    /*
     if (x0 < 1e-10)
     {
         printf("step = %f", h);
@@ -58,7 +59,7 @@ int RKstep(double y[2], void (*f)(double[2], double, double[2]), double x0, doub
         printf("(%.10f, %.10f) -> (%.10f, %.10f)\n", y0[0], y0[1], y[0], y[1]);
 
     }
-    
+    */
 }
 
 int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0, double y0[2], double x_1, double tol, FILE* plot, double x_T[2]){
@@ -94,11 +95,12 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
         RKstep(y1,f,x,y,h);
         y[0] = y1[0];
         y[1] = y1[1];
-        if(x < 1e-10)
+       /* if(x < 1e-10)
         {
             printf("after double step = (%lf, %lf)\n",y[0], y[1]);
             printf("step = %f\n", h_);
         }
+        */
         // в у записан конец шага
         //начало подсчета ошибки на шаге
         // два шага длины h_
@@ -108,8 +110,8 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
             y_[0] = y1_[0];
             y_[1] = y1_[1];
         }
-        if(x < 1e-10)
-            printf("after two steps = (%lf, %lf)\n",y_[0], y_[1]);
+     //   if(x < 1e-10)
+       //     printf("after two steps = (%lf, %lf)\n",y_[0], y_[1]);
         // в у_ запмсан результат за 2 шага
 
         //	printf("h_ = %e\n");
@@ -122,8 +124,8 @@ int RKsolver(double y_x1[2], void (*f)(double[2], double, double[2]), double x0,
         h_new = fac*pow((tol/err),(double)1/(4+1));
         h_new = facmin > h_new ? facmin : h_new;
         h_new = facmax < h_new ? facmax : h_new;
-        if(x < 1e-10)
-            printf("factor = %f\n\n",h_new);
+        //if(x < 1e-10)
+          //  printf("factor = %f\n\n",h_new);
         h_ = h_*h_new;
         //коне подсчета ошибки на шаге
         if(err > tol){
@@ -185,6 +187,7 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
     yn0[1] = y0[1];
     // записали, откуда стартуем
     for(;;){
+        count++;
         RKsolver(y1,f,0,yn0,200,tol,NULL,x);
         //прогоняем решение на временном интервале 0-200
         x1 = x[0]; x2 = x[1];
@@ -194,10 +197,6 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             x3 = x1 - (x2-x1)*y1[1]/(y2[1]-y1[1]);
             x1 = x2;
             x2 = x3;
-            if(++count == 4)
-            {
-                // printf("x1 = %f, x2 = %f, x2 - x1 = %f\n", x1, x2, x2 - x1);
-            }
 
         }while(fabs(x2-x1) > tolChord);
         // printf("x1 = %f, x2 = %f, x2 - x1 = %.20f\n", x1, x2, x2 - x1);
@@ -206,6 +205,7 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             //старт совпадает с концом, все отлично
             y_c[0] = y2[0];
             y_c[1] = y2[1];
+            printf("Count = %d\n", count);
             break;
         }
         yn0[0] = y2[0];
@@ -237,12 +237,12 @@ int main(){
     RKsolver(y1, f, t0, y0, T, tol,f1,NULL);
     fclose(f1);
 
-    // findCycle(y_c, f, y0, tol, tolChord, tolCycle);
-    // printf("%lf %lf\n", y_c[0], y_c[1]);
+     findCycle(y_c, f, y0, tol, tolChord, tolCycle);
+     printf("%lf %lf\n", y_c[0], y_c[1]);
 
-    // f1 = fopen("plot_cycle","w");
-    // RKsolver(y1, f, 0, y_c, T, tol, f1, NULL);
-    // fclose(f1);
+     f1 = fopen("plot_cycle","w");
+     RKsolver(y1, f, 0, y_c, T, tol, f1, NULL);
+     fclose(f1);
 
     return 0;
 }
