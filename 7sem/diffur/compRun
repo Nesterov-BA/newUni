@@ -3,4 +3,4 @@ rm -rf obj/*
 make clean
 make
 clear
-./bin/a.out 1 0
+./bin/a.out $1

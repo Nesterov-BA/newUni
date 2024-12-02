@@ -4,7 +4,7 @@
 
 void f(double f_val[2], double x, double y[2]);
 void f(double f_val[2], double x, double y[2]){
-    double a = 1;
+    double a = 0.1;
     f_val[0] = y[1];
     f_val[1] = a*(1-y[0]*y[0])*y[1]-y[0];
 }
@@ -191,7 +191,9 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
         RKsolver(y1,f,0,yn0,200,tol,NULL,x);
         //прогоняем решение на временном интервале 0-200
         x1 = x[0]; x2 = x[1];
+        int count2 = 0;
         do{
+            count2++;
             RKsolver(y1,f,0,yn0, x1, tol, NULL, NULL);
             RKsolver(y2,f,0,yn0, x2, tol, NULL, NULL);
             x3 = x1 - (x2-x1)*y1[1]/(y2[1]-y1[1]);
@@ -199,6 +201,7 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             x2 = x3;
 
         }while(fabs(x2-x1) > tolChord);
+        //printf("Count2 = %d\n", count2);
         // printf("x1 = %f, x2 = %f, x2 - x1 = %.20f\n", x1, x2, x2 - x1);
         // printf("yn[0] = %f, y[2] = %f, yn[0] - y[2] = %.20f\n", yn0[0], y2[0], yn0[0] - y2[0]);
         if(fabs(yn0[0]-y2[0]) < tolCycle){
