@@ -13,7 +13,7 @@ void Runge_Kutta4StepVariedSimple(double* start, double* end, function* function
 
 void shooting(double* start, double alpha, function* functions, double finish);
 
-void probe(double* start, std::vector<double> (*function)(double, double));
+std::vector<double> probe(double* start, std::vector<double> (*function)(double, double));
 int findMinimum(double* start, std::vector<double> (*function)(double, double));
 void jacobiMatrix(double p1, double p2, std::vector<double> (*func)(double, double), double** matrix);
 std::vector<double> error(double p1, double p2, function* functions);

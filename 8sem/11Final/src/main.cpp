@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
     finish = M_PI/2;
     double start[4];
     double end[4];
-    double integral = 0;
     tolerance = 1.e-11;
     if(argc > 1)
     {
@@ -87,10 +86,34 @@ int main(int argc, char* argv[])
     start[1] = 0;
     start[2] = 0;
     start[3] = 1;
+    double integral = 0;
     solutionUpToTime(start, end, functions, finish);
     double start2[] = {2, 1};
-    printf("End: %.e, %lf, %.e %.e\n", end[0], end[1], end[2], end[3] + (M_PI/2));
+    printf("End: %.e, %lf, %lf %lf\n", end[0], end[1], end[2], end[3] + (M_PI/2));
 //    findMinimum(start2, errorFunc);
-    probe(start2, errorFunc);
+    std::vector<double> starts(8);
+    starts = probe(start2, errorFunc);
+    for(int i = 0; i < 4; i++)
+	    printf("%lf, %lf\n", starts[2*i], starts[2*i+1]);
+    alpha = 0.0;
+    start[0] = starts[0];
+    start[3] = starts[1];
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    printf("Integral = %lf\n", integral);
+    alpha = 0.01;
+    start[0] = starts[2];
+    start[3] = starts[3];
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    printf("Integral = %lf\n", integral);
+    alpha = 1.02;
+    start[0] = starts[4];
+    start[3] = starts[5];
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    printf("Integral = %lf\n", integral);
+    alpha = 10.01;
+    start[0] = starts[6];
+    start[3] = starts[7];
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    printf("Integral = %lf\n", integral);
     return 0;
 }

@@ -1,6 +1,5 @@
 #include "rungeKutta.hpp"
 #include <cstdio>
-#include <string>
 #include <system_error>
 
 double maxStep = 1;
@@ -239,10 +238,10 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
      ofstream file(filename);
      int numOfPoints = 0;
      double initialStart[4];
-     double tempInt = 0;
      double time = 0;
      double step = 0.1;
      double* tempEnd = new double[4];
+     *integral = 0;
      file << "p1,p2,x1,x2,time" << endl;
      for (int i =0; i < 4; i++)
      {
@@ -268,8 +267,8 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
          {
 //             dorPri5Varied(start, tempEnd, functions, &step, time);
              Runge_Kutta4StepVariedSimple(start, tempEnd, functions, &step, time);
-             tempInt += (tempEnd[1]*tempEnd[1] + start[1]*start[1])*step;
              time += step;
+             *integral += (tempEnd[1]*tempEnd[1] + start[1]*start[1])*step/2;
              numOfPoints++;
          }
 
@@ -287,6 +286,5 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
          start[i] = initialStart[i];
          end[i] = tempEnd[i];
      }
-     *integral = tempInt;
      //printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
  }

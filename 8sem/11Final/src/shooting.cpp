@@ -28,49 +28,34 @@ void jacobiMatrix(double p1, double p2, std::vector<double> (*func)(double, doub
     matrix[1][1] = resY[1];
 }
 
-void probe(double* start, std::vector<double> (*function)(double, double))
+std::vector<double> probe(double* start, std::vector<double> (*function)(double, double))
 {
-    FILE* minimumStarts = fopen("starts.csv", "w");
-    fprintf(minimumStarts, "p2,x1,alpha\n");
-    double start4[4] = {0, 0, 0, 0};
-    alpha = 0.01;
-    double step = 0.1;
-    while(alpha < 10.02)
-    {
-        if(fabs(alpha - 1.01) < 1.e-7)
-          alpha = 1.02;
-        printf("alpha = %lf\n", alpha);
-        printf("Start = %lf, %lf\n", start[0], start[1]);
-        if(findMinimum(start, function) < 0)
-        {
-            printf("something wrong!\n");
-            break;
-        }
-        printf("Start = %lf, %lf\n\n", start[0], start[1]);
-        if(fabs(alpha - 0.01) < 1.e-7)
-        {
-            start4[0] = start[0];
-            start4[3] = start[1];
-        }
-        fprintf(minimumStarts, "%lf,%lf,%lf\n", start[0], start[1], alpha);
-        modf(alpha, &step);
-        step /= 10;
-        step += 0.1;
-        printf("Step = %lf\n", step);
-        alpha +=step;
-    }
-    alpha = 10.01;
-    printf("alpha = %lf\n", alpha);
-    printf("Start = %lf, %lf\n", start[0], start[1]);
-    if(findMinimum(start, function) < 0)
-    {
-        printf("something wrong!\n");
-    }
     printf("Start = %lf, %lf\n\n", start[0], start[1]);
-    fprintf(minimumStarts, "%lf,%lf,%lf\n", start[0], start[1], alpha);
-
-
-
+    std::vector<double> starts(8); 
+    for(int i = 0; i < 8; i++)
+    	starts[i] = 0.0;
+    starts[0] = 2;
+    starts[1] = 1;
+    alpha = 0.01;
+    if(findMinimum(start, function) < 0)
+        printf("something wrong!\n");
+    starts[2] = start[0];
+    starts[3] = start[1];
+    alpha = 1.02;
+    if(findMinimum(start, function) < 0)
+        printf("something wrong!\n");
+    starts[4] = start[0];
+    starts[5] = start[1];
+    alpha = 10.01;
+    if(findMinimum(start, function) < 0)
+        printf("something wrong!\n");
+    starts[6] = start[0];
+    starts[7] = start[1];
+    printf("alpha = %lf, start = %lf, %lf\n", 0.0, starts[0], starts[1]);
+    printf("alpha = %lf, start = %lf, %lf\n", 0.01, starts[2], starts[3]);
+    printf("alpha = %lf, start = %lf, %lf\n", 1.02, starts[4], starts[5]);
+    printf("alpha = %lf, start = %lf, %lf\n", 10.01, starts[6], starts[7]);
+    return starts;
 }
 
 int findMinimum(double* start, std::vector<double> (*function)(double, double))
