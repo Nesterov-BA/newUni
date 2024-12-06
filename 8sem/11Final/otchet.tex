@@ -1,0 +1,195 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\graphicspath{ {./images/} }
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{mathtext}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{multirow}
+
+\DeclareMathOperator{\facmin}{facmin}
+\DeclareMathOperator{\facmax}{facmax}
+\DeclareMathOperator{\fac}{fac}
+\DeclareMathOperator{\tol}{tol}
+\DeclareMathOperator{\err}{err}
+\title{отчет 29}
+\author{nesterov.boris123 }
+\date{December 2023}
+
+\begin{document}
+
+\section{Условие.}
+\begin{gather*}
+ \int\limits_{0}^{\frac \pi 2}u^{2} dt \rightarrow \inf\\
+ \ddot x + \frac{x}{1 + \alpha t^{2}} = u\\
+  x(0) = x(\frac \pi 2) = 0\\
+  \dot{x}(\frac \pi 2) = -\frac \pi 2\\
+  \alpha \in \{0;0.01;1.02;10.02\}
+\end{gather*}
+\section{Сведение к задаче Лагранжа.}
+\begin{gather*}
+ \int\limits_{0}^{\frac \pi 2}u^{2} dt \rightarrow \inf\\
+ \dot x_{1} = x_{2}\\
+ \dot x_{2} = u - \frac{x_{1}}{1 + \alpha t^{2}}\\
+  x_{1}(0) = x_{1}(\frac \pi 2) = 0\\
+  x_{2}(\frac \pi 2) = -\frac \pi 2\\
+  \alpha \in \{0;0.01;1.02;10.02\}
+\end{gather*}
+\section{Система необходимых условий оптимальности}
+\begin{gather*}
+  L = \lambda_{0}\left(u^{2}\right) + p_{1}(\dot x_{1} - x_{2}) + p_{2}\left(\dot x_{2} - u + \frac{x_{1}}{1 + \alpha t^{2}}\right)\\
+  l = \lambda_{1}x_{1}(0) + \lambda_{2}x_{1}\left(\frac \pi 2\right) + \lambda_{3}\left(x_{2}(\frac \pi 2) + \frac \pi 2\right)
+\end{gather*}
+Уравнения Эйлера-Лагранжа:
+\begin{gather*}
+  \dot p_{1} = \frac{p_{2}}{1 + \alpha t^{2}}\\
+  \dot p_{2} = -p_{1}
+\end{gather*}
+Принцип максимума:
+$$2\lambda_{0}u = p_{2}$$
+Условия трансверсальности:
+\begin{gather*}
+  p_{1}(0) = \lambda_{1}\\
+  p_{2}(0) = 0\\
+  p_{1}(\frac \pi 2) = -\lambda_{2}\\
+  p_{2}(\frac \pi 2) = -\lambda_{3}
+\end{gather*}
+Условие НЕРОН и $\lambda_{0} \ge 0$
+
+Заметим, что из $\lambda_{0} = 0$ следует $p_{1} \equiv 0, p_{2} \equiv 0$, и из условий
+трансверсальности $\lambda_{1} = \lambda_{2} = \lambda_{3} = 0$, что противоречит НЕРОН.
+Далее считаем $\lambda_{0} = \frac{1}{2}$, чтобы $u = p_{2}$.
+\section{Краевая задача.}
+Итак, получили краевую задачу:
+$$\begin{cases}
+  \dot p_{1} = \frac{p_{2}}{1 + \alpha t^{2}}\\
+  \dot p_{2} = -p_{1}\\
+ \dot x_{1} = x_{2}\\
+ \dot x_{2} = p_{2} - \frac{x_{1}}{1 + \alpha t^{2}}\\
+  p_{2}(0) = 0\\
+  x_1(0) = 0\\
+  x_{1}(\frac \pi 2) = 0\\
+  x_2(\frac \pi 2) = -\frac \pi 2
+\end{cases}$$
+\section{Аналитическое решение при $\alpha = 0$}
+При $\alpha = 0$ система приобретает вид:
+$$\begin{cases}
+  \dot p_{1} = p_{2}\\
+  \dot p_{2} = -p_{1}\\
+  \dot x_{1} = x_{2}\\
+  \dot x_{2} = p_{2} - x_{1}\\
+  p_{2}(0) = 0\\
+  x_1(0) = 0\\
+  x_{1}(\frac \pi 2) = 0\\
+  x_2(\frac \pi 2) = -\frac \pi 2
+\end{cases}$$
+Первые два уравнения, с учетом условия $p_{2}(0) = 0$ решаются в виде
+\begin{gather*}
+  p_{1}(t) = C_{1}\cos(t)\\
+  p_{2}(t) = -C_{1}\sin(t)
+\end{gather*}
+Третье и четвертое уравнения приобретают вид:
+
+\begin{gather*}
+  \dot x_{1} = x_{2}\\
+  \dot x_{2} = -x_{1} - C_{1}\sin(t)
+\end{gather*}
+Подставляя первое уравнение во второе, получаем
+$\ddot x_{1} + x_{1} = -C_{1}\sin(t)$. Общее однородного:
+$x_{1} = C_{2}\cos(t) + C_{3}\sin(t)$, частное решение:
+$x_{1} = \frac {C_{1}}{2} t \cos(t)$. Общее решение:
+\begin{gather*}
+x_{1}(t) = \frac {C_{1}}{2} t \cos(t) + C_{2}\cos(t) + C_{3}\sin(t)\\
+x_{2}(t) =\dot x_{1} = \frac {C_{1}}{2} \big(\cos(t) - t\sin(t)\big) + C_{3}\cos(t) - C_{2}\sin(t)
+\end{gather*}
+Далее из граничных условий:
+\begin{gather*}
+  x_{1}(0) = 0 \Rightarrow C_{2} = 0\\
+  x_{1}\left(\frac \pi 2\right) = 0 \Rightarrow C_{3} = 0\\
+  x_{2}\left(\frac \pi 2\right) = -\frac \pi 2 \Rightarrow -\frac{C_{1}}{2}\frac{\pi}2 = \frac \pi 2 \Rightarrow C_{1} = 2
+\end{gather*}
+Итак, решение краевой задачи при $\alpha = 0$ имеет вид:
+\begin{gather*}
+  p_{1} = 2\cos(t)\\
+  p_{2} = -2\sin(t)\\
+  x_{1} = t\cos(t)\\
+  x_{2} = \cos(t) - t\sin(t)
+\end{gather*}
+Отсюда в частности получаем, что точное решение при $\alpha = 0$ начинается в $(2, 0, 0, 1)$.
+\section{Численное решение в общем виде}
+Зададим функцию ошибок как функцию от $\big(p_{1}(0), x_{2}(0)\big)$, возвращающую
+$\Bigl(x_{1}\left(\frac \pi 2\right), x_{2}\left(\frac \pi 2\right) + \frac \pi 2\Bigr)$ --- вектор
+ошибки. Обозначим ее $R_{\alpha}(x)$.
+
+Итак, задача свелась к поиску нуля функции $R_{\alpha}(x)$ при различных
+$\alpha$. Из вида аналитического решения $R_{0}(2,1) = 0$.
+Искать нуль при произвольном $\alpha$ будем при помощи метода
+Ньютона для систем уравнений. Если есть какое-то приближение нуля $x_{k}$,
+следующее приближение $x_{k+1}$ ищется по алгоритму:
+\begin{enumerate}
+  \item Считаем матрицу Якоби $R'(x_{k})$.
+  \item Считаем $x_{k+1} = x_{k} - 2^{-n}\Bigl(R'(x_{k})\Bigr)^{-1}R(x_{k})$,
+        $n = 0,1,\ldots$, пока норма $F(x_{k+1})$ не станет меньше нормы $F(x_{k})$.
+\end{enumerate}
+Условий выхода из алгоритма три:
+\begin{enumerate}
+  \item $||F(x_{k})|| < \epsilon$, это означает, что искомый нуль найден.
+  \item $n > N$, это означает, что значение на следующем шаге не может быть уменьшено.
+  \item $k > K$, это означает, что алгоритм не может найти нуль и уходит в бесконечность.
+\end{enumerate}
+
+Для $\alpha = 0$ известно точное значение нуля. Для каждого следующего необходимого значения $\alpha$ будем
+искать начальные условия применяя метод Ньютона для поиска нуля функции ошибок.
+\section{Оценки точности решений.}
+Матрица Якоби системы:
+$$J = \begin{pmatrix}
+0 & \frac{1}{1 + \alpha t^{2}} & 0 & 0\\
+-1 & 0 & 0 & 0\\
+0 & 0 & 0 & 1\\
+0 & 1 & 0 & -\frac{1}{1 + \alpha t^{2}}
+\end{pmatrix}.$$
+Для нахождения ее логарифмической нормы необходимо найти максимальное по модулю собственное значение матрицы:
+$$\frac{J + J^{T}}2 = \frac 1 2
+\begin{pmatrix}
+0 & \frac{1}{1 + \alpha t^{2}}-1 & 0 & 0\\
+\frac{1}{1 + \alpha t^{2}}-1 & 0 & 0 & 1\\
+0 & 0 & 0 & 1\\
+0 & 1 & 1 & -\frac{2}{1 + \alpha t^{2}}
+\end{pmatrix}.$$
+Обозначим $A = \frac{1}{1 + \alpha t^{2}}$. Получаем, что $A \in [\frac{1}{1 + \frac{\alpha}{4}\pi^{2}}, 1]$.
+Характеристический многочлен матрицы $J + J^{T}$ принимает вид:
+\[\lambda^{4} + 2A\lambda^{3} + \left(-A^{2} + 2A -3\right)\lambda^{2} + \left(-2A^{3} + 4A^{2} - 2A\right)\lambda + A^{2} - 2A + 1.\]
+С уменьшением $A$, максимальный корень уравнения увеличивается, достигая максимума при $A = \frac{1}{1 + \alpha}$.
+Можем ограничить его сверху корнем при $A = 0$, тогда уравнение принимает вид $\lambda^{4} - 3\lambda^{2} + 1 = 0$.
+Его максимальный корень равен $\sqrt{\frac{3 + \sqrt{5}}{2}}$.
+\begin{gather*}
+  L = \sqrt{\frac{3 + \sqrt{5}}{8}}\\
+  h^{p}C = tol*h = 10^{-9}\\
+  x_{N} - x_{0} = \frac \pi 2;
+\end{gather*}
+Здесь подсчеты велись с точностью $10^{-11}$, по результатам шаг не был менее $10^{-2}$
+Получаем оценку $$E \le \frac{2\sqrt{2}\times 10^{-9}}{\sqrt{3 + \sqrt{5}}}(e^{\frac \pi 4\sqrt{\frac{3 + \sqrt{5}}{2}}}) \approx 4.40498246\times 10^{-9}$$
+\section{Исследование оптимальности экстремалей}
+Отметим, что $L_{uu} = 2 > 0$, значит выполняется усиленное условие Лежандра и условие
+квазирегулярности. При этом $L_{uu}$ -- единственная не равна $0$.
+Значит вторая вариация имеет вид
+$\mathcal{L}_{\epsilon\epsilon} = \int\limits_{0}^{\frac \pi 2}(\delta u)^{2}dt$. Очевидно, она положительно определена.
+
+
+С учетом написанного выше заключаем, что каждая экстремаль представляет собой строгий локальный минимум.
+А так как задача квадратично-линейна, локальный минимум совпадает с глобальным.
+\section{Результаты вычислений.}
+В таблице приведены $\alpha$, начальные параметры и векторы ошибок:
+
+\begin{tabular}{|c|c|c|c|}
+  \hline
+   $\alpha$ & $p_{1}(0), x_{2}(0)$ & $x_{1}(\frac \pi 2), x_{2}(\frac \pi 2) + \frac \pi 2$ & $\int\limits_{0}^{\frac \pi 2}u^{2}dt$\\
+  \hline
+    $0$ & $2, 1$ & $2\times10^{-10}, 7\times10^{-10}$ & $3.121412$\\
+    $0.01$ &$2.002290, 0.999522$ &$1\times 10^{-7}, 2\times 10^{-8}$ & $3.136704$\\
+    $1.02$ &$2.063073, 0.951506$ &$5\times 10^{-8}, 1\times 10^{-7}$ & $3.845041$\\
+    $10.01$ &$2.003069, 0.851357$ &$2\times 10^{-7}, 7\times 10^{-8}$ & $4.509533$\\
+  \hline
+\end{tabular}
+\end{document}
