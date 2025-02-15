@@ -7,7 +7,7 @@
 
 void jacobiMatrix(double p1, double p2, std::vector<double> (*func)(double, double), double** matrix)
 {
-    double eps = 1.e-7;
+    double eps = 1.e-9;
     std::vector<double> res(2);
     std::vector<double> resX(2);
     std::vector<double> resY(2);
@@ -73,7 +73,7 @@ int findMinimum(double* start, std::vector<double> (*function)(double, double))
         count++;
         coefficent = 1;
         errorVector = function(start[0], start[1]);
-        if(l2Norm(errorVector, 2) < 1.e-7)
+        if(l2Norm(errorVector, 2) < 1.e-9)
         {
             printf("Small Error!\n");
             printf("Error = (%.e, %.e)\n", errorVector[0], errorVector[1]);
@@ -106,14 +106,14 @@ int findMinimum(double* start, std::vector<double> (*function)(double, double))
         start[0] += correction[0]*coefficent;
         start[1] += correction[1]*coefficent;
 //        printf("New Start = (%lf, %lf)\n", start[0], start[1]);
-        if(l2Norm(function(start[0], start[1]), 2) < 1.e-7)
+        if(l2Norm(function(start[0], start[1]), 2) < 1.e-9)
         {
             printf("Small Error!\n");
             printf("Res = (%.e, %.e)\n", res[0], res[1]);
             return 0;
             break;
         }
-        if(count > 100)
+        if(count > 300)
         {
             printf("Big Count!\n");
             printf("Res = (%lf, %lf)\n", res[0], res[1]);
@@ -133,4 +133,30 @@ void solve(double* start, std::vector<double> (*function)(double, double))
         corr = function(start[0], start[1]);
         start[1] -= corr[1];
     }
+}
+
+void jacobiCheck(function* functions, string filename)
+{
+    double start1[4] = {1,0,0,0};
+    double start2[4] = {0,0,0,1};
+    double end1[4];
+    double end2[4];
+    double step = finish/100.0;
+    double time = 0;
+    double determinant;
+    ofstream determinants(filename);
+    determinants << "det,time\n";
+    for(int i = 1; i < 100; ++i)
+    {
+        time += step;
+        solutionUpToTime(start1, end1, functions, time);
+        solutionUpToTime(start2, end2, functions, time);
+        determinant = end1[2]*end2[3] - end1[3]*end2[3];
+        determinants << determinant << "," << time << "\n";
+    }
+    time = finish;
+    solutionUpToTime(start1, end1, functions, time);
+    solutionUpToTime(start2, end2, functions, time);
+    determinant = end1[2]*end2[3] - end1[3]*end2[3];
+    determinants << determinant << "," << time << "\n";
 }

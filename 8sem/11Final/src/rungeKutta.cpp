@@ -1,4 +1,5 @@
 #include "rungeKutta.hpp"
+#include "normCalculation.hpp"
 #include <cstdio>
 #include <system_error>
 
@@ -38,7 +39,39 @@ void dorPri5Varied(double* start, double* end, function* functions, double* step
     }
     dorPri5(start, end, err, functions, *step, time);
 }
+void Runge_Kutta4StepVariedSimple(double* start, double* end, function* functions, double* step, double time, double* globalError)
+{
+    double err = 1;
+    double* tempEnd = new double[4];
+    double* errVector = new double[4];
+    double stepFac;
+    while (err > tolerance)
+    {
+        Runge_Kutta4ClassicSimple(start, end, functions, *step, time);
 
+        Runge_Kutta4ClassicSimple(start, tempEnd, functions, *step/2, time);
+        Runge_Kutta4ClassicSimple(tempEnd, tempEnd, functions, *step/2, time + *step/2);
+
+        for(int i = 0; i < 4; i++)
+        {
+            errVector[i] = fabs(tempEnd[i]+(tempEnd[i]-end[i])/(16-1));
+            errVector[i] = fabs(end[i] - tempEnd[i]) / errVector[i];
+        }
+
+        err = lInfNorm(errVector, 2);
+        err /= (16-1);
+        if(fabs(err) < tolerance)
+            break;
+        stepFac = factor*pow((tolerance/err),(double)1/(4+1));
+        stepFac = minStep > stepFac ? minStep : stepFac;
+        stepFac = maxStep < stepFac ? maxStep : stepFac;
+        *step = *step*stepFac;
+    }
+
+
+    *globalError *= exp(*step*(logNorm(1/(1 + alpha*time*time)) + logNorm(1/(1 + alpha*(time + *step)*(time + *step))))/2);
+    *globalError += err;
+}
 void Runge_Kutta4StepVariedSimple(double* start, double* end, function* functions, double* step, double time)
 {
     double err = 1;
@@ -233,16 +266,19 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
      }
      //printf("Number of points: %d, average step: %e\n", numOfPoints, time/numOfPoints);
  }
-void solutionUpToTime(double* start, double* end, function* functions, double finish, string filename, double* integral)
+void solutionUpToTime(double* start, double* end, function* functions, double finish, string filename, double* integral, double* globalError)
  {
      ofstream file(filename);
+     ofstream fileErr("globalError.csv");
      int numOfPoints = 0;
      double initialStart[4];
      double time = 0;
      double step = 0.1;
      double* tempEnd = new double[4];
+     *globalError = 0;
      *integral = 0;
      file << "p1,p2,x1,x2,time" << endl;
+     fileErr << "error, time" << endl;
      for (int i =0; i < 4; i++)
      {
          initialStart[i] = start[i];
@@ -266,7 +302,8 @@ void solutionUpToTime(double* start, double* end, function* functions, double fi
          else
          {
 //             dorPri5Varied(start, tempEnd, functions, &step, time);
-             Runge_Kutta4StepVariedSimple(start, tempEnd, functions, &step, time);
+             Runge_Kutta4StepVariedSimple(start, tempEnd, functions, &step, time, globalError);
+             fileErr << *globalError << "," << time << "\n";
              time += step;
              *integral += (tempEnd[1]*tempEnd[1] + start[1]*start[1])*step/2;
              numOfPoints++;

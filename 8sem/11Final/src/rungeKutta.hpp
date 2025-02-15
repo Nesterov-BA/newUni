@@ -3,7 +3,7 @@
 // #include "normCalculation.hpp"
 
 void solutionUpToTime(double* start, double* end, function* functions, double finish);
-void solutionUpToTime(double* start, double* end, function* functions, double finish, string filename, double* integral);
+void solutionUpToTime(double* start, double* end, function* functions, double finish, string filename, double* integral, double* globalError);
 void dorPri5(double* start, double* end, double* err, function* functions, double step, double time);
 void dorPri5Varied(double* start, double* end, function* functions, double* step, double time);
 
@@ -18,3 +18,5 @@ int findMinimum(double* start, std::vector<double> (*function)(double, double));
 void jacobiMatrix(double p1, double p2, std::vector<double> (*func)(double, double), double** matrix);
 std::vector<double> error(double p1, double p2, function* functions);
 std::vector<double> revError(double p1, double p2, function* functions, double alpha);
+
+void jacobiCheck(function* functions, string filename);

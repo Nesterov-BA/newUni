@@ -358,7 +358,7 @@ int fasterSolutionUpToTime(double xStart, double yStart, double f(double, double
             yValue = yValueTemp2Steps;
             // обновляем значение решения, записывая результат за 2 шага
             if(yStartTemp*yValue < 0)
-                // printf("%f*%f,time = %f, count = %d\n",yStartTemp,yValue,x, nT);
+                 printf("%f*%f,time = %f, count = %d\n",yStartTemp,yValue,time, nT);
             if(yStartTemp*yValue < 0 && ++nT == 2){
                 *cycleTimeLess = time;
                 *cycleTimeMore = tempTime;
@@ -366,7 +366,7 @@ int fasterSolutionUpToTime(double xStart, double yStart, double f(double, double
                 // х - это время на начале шага
                 // х_ - это время в конце шага
             }
-                // если надо записать время цикла , то записываем
+            // если надо записать время цикла , то записываем
             time = tempTime;
             //обновляем время
             if(plot != NULL)

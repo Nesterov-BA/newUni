@@ -1,4 +1,5 @@
 #include "rungeKutta.hpp"
+#include "normCalculation.hpp"
 #include "metricFuncs.hpp"
 #include "gaussian.hpp"
 #include "gradient.hpp"
@@ -87,6 +88,13 @@ int main(int argc, char* argv[])
     start[2] = 0;
     start[3] = 1;
     double integral = 0;
+    double globalError = 0;
+
+    double** jacobi = new double*[2];
+    jacobi[0] = new double[2];
+    jacobi[1] = new double[2];
+    double jacNorm, jacobian, edgeErr;
+
     solutionUpToTime(start, end, functions, finish);
     double start2[] = {2, 1};
     printf("End: %.e, %lf, %lf %lf\n", end[0], end[1], end[2], end[3] + (M_PI/2));
@@ -98,22 +106,50 @@ int main(int argc, char* argv[])
     alpha = 0.0;
     start[0] = starts[0];
     start[3] = starts[1];
-    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral, &globalError);
     printf("Integral = %lf\n", integral);
+    printf("Global error = %5.e\n", globalError);
+    jacobiMatrix(start[0], start[3], errorFunc, jacobi);
+    jacobian = jacobi[0][0]*jacobi[1][1] - jacobi[0][1]*jacobi[1][0];
+    jacNorm = (abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]))/jacobian;
+    edgeErr = (jacNorm * (1.e-9 + globalError))/(1 - jacNorm*deltaJacNorm(errorFunc, start[0], start[3], globalError));
+    printf("Inital param error = %5.e\n", abs(edgeErr));
+    jacobiCheck(functions, "dets0.csv");
     alpha = 0.01;
     start[0] = starts[2];
     start[3] = starts[3];
-    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral, &globalError);
     printf("Integral = %lf\n", integral);
+    printf("Global error = %5.e\n", globalError);
+    jacobiMatrix(start[0], start[3], errorFunc, jacobi);
+    jacobian = jacobi[0][0]*jacobi[1][1] - jacobi[0][1]*jacobi[1][0];
+    jacNorm = (abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]))/jacobian;
+    edgeErr = (jacNorm * (1.e-9 + globalError))/(1 - jacNorm*deltaJacNorm(errorFunc, start[0], start[3], globalError));
+    printf("Inital param error = %5.e\n", abs(edgeErr));
+    jacobiCheck(functions, "dets01.csv");
     alpha = 1.02;
     start[0] = starts[4];
     start[3] = starts[5];
-    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral, &globalError);
     printf("Integral = %lf\n", integral);
+    printf("Global error = %5.e\n", globalError);
+    jacobiMatrix(start[0], start[3], errorFunc, jacobi);
+    jacobian = jacobi[0][0]*jacobi[1][1] - jacobi[0][1]*jacobi[1][0];
+    jacNorm = (abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]))/jacobian;
+    edgeErr = (jacNorm * (1.e-9 + globalError))/(1 - jacNorm*deltaJacNorm(errorFunc, start[0], start[3], globalError));
+    printf("Inital param error = %5.e\n", abs(edgeErr));
+    jacobiCheck(functions, "dets102.csv");
     alpha = 10.01;
     start[0] = starts[6];
     start[3] = starts[7];
-    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral);
+    solutionUpToTime(start, end, functions, finish, "plot0.csv", &integral, &globalError);
     printf("Integral = %lf\n", integral);
+    printf("Global error = %5.e\n", globalError);
+    jacobiMatrix(start[0], start[3], errorFunc, jacobi);
+    jacobian = jacobi[0][0]*jacobi[1][1] - jacobi[0][1]*jacobi[1][0];
+    jacNorm = (abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]) + abs(jacobi[0][0]))/jacobian;
+    edgeErr = (jacNorm * (1.e-9 + globalError))/(1 - jacNorm*deltaJacNorm(errorFunc, start[0], start[3], globalError));
+    printf("Inital param error = %5.e\n", abs(edgeErr));
+    jacobiCheck(functions, "dets1001.csv");
     return 0;
 }

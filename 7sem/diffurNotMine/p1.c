@@ -201,6 +201,7 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             x2 = x3;
 
         }while(fabs(x2-x1) > tolChord);
+        printf("Count = %d, count2 = %d \n", count, count2);
         //printf("Count2 = %d\n", count2);
         // printf("x1 = %f, x2 = %f, x2 - x1 = %.20f\n", x1, x2, x2 - x1);
         // printf("yn[0] = %f, y[2] = %f, yn[0] - y[2] = %.20f\n", yn0[0], y2[0], yn0[0] - y2[0]);
@@ -208,7 +209,6 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
             //старт совпадает с концом, все отлично
             y_c[0] = y2[0];
             y_c[1] = y2[1];
-            printf("Count = %d\n", count);
             break;
         }
         yn0[0] = y2[0];
@@ -218,7 +218,7 @@ void findCycle(double y_c[2], void (*f)(double[2], double, double[2]), double y0
 
 int main(){
 
-    double T = 100;
+    double T = 10;
     double t0 = 0.0;
     double x0 = 1;
     double z0 = 0;
@@ -236,14 +236,14 @@ int main(){
     y0[0] = x0;
     y0[1] = z0;
 
-    f1 = fopen("plot","w");
+    f1 = fopen("plot.csv","w");
     RKsolver(y1, f, t0, y0, T, tol,f1,NULL);
     fclose(f1);
 
      findCycle(y_c, f, y0, tol, tolChord, tolCycle);
      printf("%lf %lf\n", y_c[0], y_c[1]);
 
-     f1 = fopen("plot_cycle","w");
+     f1 = fopen("plot_cycle.csv","w");
      RKsolver(y1, f, 0, y_c, T, tol, f1, NULL);
      fclose(f1);
 

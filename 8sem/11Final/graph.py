@@ -79,10 +79,71 @@ if column_names and arrays:
 plt.legend()
 plt.savefig('plot.png')
 plt.close()
-arrays_err = np.array(arrays_err)
-print(arrays_err.shape)
-arrays_err = arrays_err[:,abs(arrays_err[2]) < 10]
-print(arrays_err.shape)
-plot_data(arrays_err,column_names_err,'errors.png', True)
-plot_data(newton,newton_names,'newton.png', False)
-print(arrays_err[:,arrays_err[2] == arrays_err[2].min()])
+column_names, arrays = convert_csv_to_float_arrays('jac1.csv')
+time = arrays[4]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotjac1.png')
+plt.close()
+column_names, arrays = convert_csv_to_float_arrays('jac2.csv')
+time = arrays[4]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotjac2.png')
+plt.close()
+column_names, arrays = convert_csv_to_float_arrays('dets0.csv')
+time = arrays[1]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotdets0.png')
+plt.close()
+column_names, arrays = convert_csv_to_float_arrays('dets01.csv')
+time = arrays[1]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotdets01.png')
+plt.close()
+column_names, arrays = convert_csv_to_float_arrays('dets102.csv')
+time = arrays[1]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotdets102.png')
+plt.close()
+column_names, arrays = convert_csv_to_float_arrays('dets1001.csv')
+time = arrays[1]
+if column_names and arrays:
+    print("Column names:", column_names)
+    for i, array in enumerate(arrays):
+        if column_names[i] != 'time':
+            plt.plot(time,array, label=column_names[i])
+plt.legend()
+plt.savefig('plotdets1001.png')
+plt.close()
+
+
+column_names, arrays = convert_csv_to_float_arrays('globalError.csv')
+time = arrays[1]
+plt.plot(time,arrays[0], label=column_names[0])
+plt.legend()
+plt.savefig('error.png')
+plt.close()
