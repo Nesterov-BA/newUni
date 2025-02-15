@@ -151,12 +151,12 @@ void jacobiCheck(function* functions, string filename)
         time += step;
         solutionUpToTime(start1, end1, functions, time);
         solutionUpToTime(start2, end2, functions, time);
-        determinant = end1[2]*end2[3] - end1[3]*end2[3];
+        determinant = end1[2]*end2[3] - end1[3]*end2[2];
         determinants << determinant << "," << time << "\n";
     }
     time = finish;
     solutionUpToTime(start1, end1, functions, time);
     solutionUpToTime(start2, end2, functions, time);
-    determinant = end1[2]*end2[3] - end1[3]*end2[3];
+    determinant = end1[2]*end2[3] - end1[3]*end2[2];
     determinants << determinant << "," << time << "\n";
 }
