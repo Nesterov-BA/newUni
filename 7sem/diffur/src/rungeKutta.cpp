@@ -39,7 +39,7 @@ void clear()
     file.close();
 }
 
-void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd)
+void solutionUpToTimeFinal(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd)
 {
     ofstream file("data.csv");
     ofstream fileErr("errorLog.txt");
@@ -96,58 +96,55 @@ void solutionUpToTime(double xStart, double yStart, double f(double, double), do
 
 
 }
-void fasterFindCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
+
+void solutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double finish, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd)
 {
-    xStart = 1;
-    yStart = 0;
-    double chordStart, chordEnd, chordTemp;
-    double cycleTimeLess, cycleTimeMore;
-    double yEnd1, yEnd2;
-    double xEnd1, xEnd2;
-    double xStartTemp, yStartTemp;
     int count = 0;
-    chordEnd = 10;
-    xStartTemp = xStart;
-    yStartTemp = yStart;
-
-    while(count < 100)
+    int numOfPoints = 0;
+    double time = 0;
+    double step = 0.1;
+    double tempX, tempY;
+    double errorSum = 0;
+    double globalError = 0;
+    double globalErrorRegular = 0;
+    while(time < finish)
     {
-        fasterSolutionUpToTime(xStartTemp, yStartTemp, f, g, 200, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
-        chordStart = cycleTimeLess;
-        chordEnd = cycleTimeMore;
-        int count2 = 0;
-        while (fabs(chordEnd - chordStart) > tolerance)
+        if(time + 2*step > finish)
         {
-            count2++;
-            fasterSolutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
-            fasterSolutionUpToTime(xStartTemp, yStartTemp, f, g, chordEnd, &cycleTimeLess, &cycleTimeMore, &xEnd2, &yEnd2);
-            //printf("(%.10f, %.10f), (%.10f, %.10f)\n", xEnd1, yEnd1, xEnd2, yEnd2);
-            chordTemp = chordStart - (chordEnd-chordStart)*yEnd1/(yEnd2-yEnd1);
-            chordStart = chordEnd;
-            chordEnd = chordTemp;
-            //std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
-        }
-        printf("count = %d, count2 = %d\n", count, count2);
-        //printf("\nCycle end \n");
+            step = (finish - time)/2;
+            Runge_Kutta4ClassicSimple(xStart, yStart, step, f, g, &tempX, &tempY);
+            Runge_Kutta4ClassicSimple(tempX, tempY, step, f, g, &tempX, &tempY);
+            numOfPoints+=2;
 
-        if(fabs(xStartTemp - xEnd2) < tolerance*100)
+        }
+        else
         {
-            *xEnd = xEnd2;
-            *yEnd = yEnd2;
-            //cout << "Cycle found from " << xStartTemp << "," << yStartTemp << " to " << xEnd2 << "," << yEnd2 << endl;
-            //std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
-
-            fasterSolutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
-
-            break;
+            Runge_Kutta4StepVariedSimple(xStart, yStart, f, g, &step, &tempX, &tempY, &errorSum, &globalError, &globalErrorRegular);
+            numOfPoints++;
         }
-    //    printf("Difference = %.11lf\n", fabs(xStartTemp - xEnd2));
-        xStartTemp = xEnd2;
-        count++;
+
+        time += 2*step;
+
+        if (yStart * tempY < 0)
+        {
+            //printf("%.10f * %.10f, timeL = %f, timeR = %f, count = %d, errorSum = %e\n", yStart, tempY, time-2*step, time, count, errorSum);
+        }
+        if (yStart * tempY < 0 && ++count == 2)
+        {
+            *cycleTimeLess = time - 2*step;
+            *cycleTimeMore = time;
+        }
+        xStart = tempX;
+        yStart = tempY;
+
     }
-    printf("\nCycle end, final count = %d\n", count);
+    *xEnd = xStart;
+    *yEnd = yStart;
+    //printf("Tolerance: %e Error: %e, numOfPoints: %d, globalError: %e, globalErrorReg: %e\n", tolerance, errorSum, numOfPoints, globalError, globalErrorRegular);
+
 
 }
+
 void findCycle(double xStart, double yStart, double f(double, double), double g(double, double), double* xEnd, double* yEnd)
 {
     xStart = 1;
@@ -189,8 +186,8 @@ void findCycle(double xStart, double yStart, double f(double, double), double g(
             //cout << "Cycle found from " << xStartTemp << "," << yStartTemp << " to " << xEnd2 << "," << yEnd2 << endl;
             //std::cout << "Cycle time: " << chordStart << " " << chordEnd << ", difference = " << -chordStart + chordEnd << endl;
 
-            solutionUpToTime(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
-
+            solutionUpToTimeFinal(xStartTemp, yStartTemp, f, g, chordStart, &cycleTimeLess, &cycleTimeMore, &xEnd1, &yEnd1);
+            printf("Cycle time = %.10f\n", chordStart);
             break;
         }
     //    printf("Difference = %.11lf\n", fabs(xStartTemp - xEnd2));
@@ -271,111 +268,4 @@ void checkCycle(double f(double, double), double g(double, double))
     //printf("ends: %.10f, %.10f\n", yEnd1, yEnd2);
 }
 
-int fasterSolutionUpToTime(double xStart, double yStart, double f(double, double), double g(double, double), double timeEnd, double* cycleTimeLess, double* cycleTimeMore, double* xEnd, double* yEnd){
-    FILE* plot = fopen("plot.txt", "w");
-    double time, tempTime, err, stepFactor, step;
-    double xValue, yValue, xValueTemp, yValueTemp;
-    double xValueTemp2Steps, yValueTemp2Steps, xStartTemp, yStartTemp;
-    double d[2];
-    //tempStartValues - старт шага, который мы не трогаем, на него откатывеася если большая ошибка
-    //tempValues, tempValues2Steps - временные значения конца шага
-    // values - правильно посчитанное значение на конце шага, его записываем в файл
-    // y1 - то, что мы запишем в values, реально ли он нужен не понятно
-    double stepIni = 0.1;// первоначальная длина шага
-    double fac = 0.8; // коэфициент для вычисления новой длины шага
-    double facmin = 0.001;// минимальная длина шага
-    double facmax = 3;// максимальная длина шага
-    int count = 0;
-    int nT = 0;
-    time = 0;
-    xValue = xStart;
-    yValue = yStart;
-    if(plot != NULL){
-        fprintf(plot,"%lf %lf %f\n",xValue,yValue, time);
-    }
-    while(time < timeEnd){
-        //printf("stepIni = %lf x = %lf \n",stepIni,x);
-        //printf("time = %.e\n",time);
-        printf("stepIni = %.e x = %lf \n",stepIni,xValue);
-        xStartTemp = xValue;
-        yStartTemp = yValue;
 
-        xValueTemp2Steps = xValue;
-        yValueTemp2Steps = yValue;
-        step = 2*stepIni;
-
-        // шаг длины 2*stepIni
-        Runge_Kutta4ClassicSimple(xStartTemp, yStartTemp, step, f, g, &xValue, &yValue);
-       /* if(x < 1e-10)
-        {
-            printf("after double step = (%lf, %lf)\n",xValue, yValue);
-            printf("step = %f\n", stepIni);
-        }
-        */
-        // в у записан конец шага
-        //начало подсчета ошибки на шаге
-        // два шага длины stepIni
-        tempTime = time;
-        for(int s = 0; s < 2; s++, tempTime += stepIni){
-            Runge_Kutta4ClassicSimple(xStartTemp, yStartTemp, stepIni, f, g, &xValueTemp2Steps, &yValueTemp2Steps);
-        }
-     //   if(x < 1e-10)
-       //     printf("after two steps = (%lf, %lf)\n",xValueTemp2Steps, yValueTemp2Steps);
-        // в у_ запмсан результат за 2 шага
-
-        //	printf("stepIni = %e\n");
-        
-        d[0] = fabs(xValueTemp2Steps+(xValueTemp2Steps-xValue)/(16-1));
-        d[1] = fabs(yValueTemp2Steps+(yValueTemp2Steps-yValue)/(16-1));
-        
-
-        err = fabs((xValueTemp2Steps-xValue)/d[0]) > fabs((yValueTemp2Steps-yValue)/d[1]) ? fabs((xValueTemp2Steps-xValue)/d[0]) : fabs((yValueTemp2Steps-yValue)/d[1]);
-        err /= (16-1);
-        stepFactor = fac*pow((tolerance/err),(double)1/(4+1));
-        stepFactor = facmin > stepFactor ? facmin : stepFactor;
-        stepFactor = facmax < stepFactor ? facmax : stepFactor;
-        //if(x < 1e-10)
-          //  printf("factor = %f\n\n",stepFactor);
-        stepIni = stepIni*stepFactor;
-        //коне подсчета ошибки на шаге
-        printf("err = %e\n",err);
-        if(err > tolerance){
-            //заново считаем с новым шагом
-            xValue = xStartTemp;
-            yValue = yStartTemp;
-        }
-        else{
-            printf("error is small\n");
-            printf("err = %e\n",err);
-            if(!(tempTime < timeEnd))
-            {
-                step = timeEnd-time;
-                Runge_Kutta4ClassicSimple(xStartTemp, yStartTemp, step, f, g, xEnd, yEnd);
-                break;
-                // если дошли до конца по времени, то выходим из цикла
-            }
-            xValue = xValueTemp2Steps;
-            yValue = yValueTemp2Steps;
-            // обновляем значение решения, записывая результат за 2 шага
-            if(yStartTemp*yValue < 0)
-                 printf("%f*%f,time = %f, count = %d\n",yStartTemp,yValue,time, nT);
-            if(yStartTemp*yValue < 0 && ++nT == 2){
-                *cycleTimeLess = time;
-                *cycleTimeMore = tempTime;
-                // printf("Cycle time: %f, %f\n", cycleTimes[0], cycleTimes[1]);
-                // х - это время на начале шага
-                // х_ - это время в конце шага
-            }
-            // если надо записать время цикла , то записываем
-            time = tempTime;
-            //обновляем время
-            if(plot != NULL)
-            {
-                fprintf(plot,"%lf %lf %f\n",xValue,yValue, time);
-            }
-            //записываем в файл текущее значение values
-        }
-
-    }
-    return 0;
-}

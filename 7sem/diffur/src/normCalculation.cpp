@@ -54,7 +54,7 @@ double* solveQuadratic(double a, double b, double c)
     return x;
 }
 //eigenvalues of a 2x2 matrix
-double* calculateEigen2by2(double* matrix)
+inline double* calculateEigen2by2(double* matrix)
 {
     double* eigenvector = new double[2];
     double a = 1;

@@ -7,14 +7,14 @@
 
 double alpha;
 double dx(double x, double y);
-double dy(double x, double y);
+inline double dy(double x, double y);
 
 double dx(double x, double y)
 {
     x = x;
     return y;
 }
-double dy(double x, double y)
+inline double dy(double x, double y)
 {
     return /*alpha*/alpha*(1-x*x)*y-x;
 }
@@ -23,6 +23,7 @@ int main (int argc, char** argv)
 {
     double xStart = 2;
     double yStart = 0;
+    double cycleTime;
     double xEnd, yEnd;
     double cycleL, cycleR;
     alpha = 0.1;
