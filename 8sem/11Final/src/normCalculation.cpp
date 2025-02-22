@@ -3,9 +3,7 @@
 
 double logNorm(double time)
 {
-    double root = 2;
-    while (polynom(time, root) > 1.e-11)
-        root -= polynom(time, root)/dPolynom(time, root);
+    double root = (1 + sqrt(1 + 4*(time-1)*(time-1)))/2;
     return root/2;
 }
 

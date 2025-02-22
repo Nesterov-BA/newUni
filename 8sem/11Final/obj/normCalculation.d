@@ -1,1 +1,2 @@
-normCalculation.o: src/normCalculation.cpp src/normCalculation.hpp
+-MM
+src/normCalculation.cpp

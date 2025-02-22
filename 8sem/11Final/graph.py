@@ -66,8 +66,7 @@ def plot_data(arrays, labels, filename, interpolated=False):
 
 # Usage
 column_names, arrays = convert_csv_to_float_arrays('data.csv')
-column_names_err, arrays_err = convert_csv_to_float_arrays('errorGraph.csv')
-newton_names, newton = convert_csv_to_float_arrays('newton.csv')
+
 
 time = arrays[4]
 print("Number of points:", len(time))
@@ -78,26 +77,6 @@ if column_names and arrays:
             plt.plot(time,array, label=column_names[i])
 plt.legend()
 plt.savefig('plot.png')
-plt.close()
-column_names, arrays = convert_csv_to_float_arrays('jac1.csv')
-time = arrays[4]
-if column_names and arrays:
-    print("Column names:", column_names)
-    for i, array in enumerate(arrays):
-        if column_names[i] != 'time':
-            plt.plot(time,array, label=column_names[i])
-plt.legend()
-plt.savefig('plotjac1.png')
-plt.close()
-column_names, arrays = convert_csv_to_float_arrays('jac2.csv')
-time = arrays[4]
-if column_names and arrays:
-    print("Column names:", column_names)
-    for i, array in enumerate(arrays):
-        if column_names[i] != 'time':
-            plt.plot(time,array, label=column_names[i])
-plt.legend()
-plt.savefig('plotjac2.png')
 plt.close()
 column_names, arrays = convert_csv_to_float_arrays('dets0.csv')
 time = arrays[1]

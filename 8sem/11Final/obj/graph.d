@@ -1,1 +1,2 @@
-graph.o: src/graph.cpp src/graph.hpp
+-MM
+src/graph.cpp

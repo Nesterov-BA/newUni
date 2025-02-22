@@ -1,1 +1,2 @@
-gradient.o: src/gradient.cpp src/metricFuncs.hpp src/gradient.hpp
+-MM
+src/gradient.cpp

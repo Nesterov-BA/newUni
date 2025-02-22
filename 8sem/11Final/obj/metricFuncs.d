@@ -1,1 +1,2 @@
-metricFuncs.o: src/metricFuncs.cpp src/metricFuncs.hpp
+-MM
+src/metricFuncs.cpp
